@@ -119,10 +119,13 @@ running experiments. They are not required for importing the core package.
 - ScienceWorld 1.2.3, Py4J 0.10.9.9, and a working Java runtime for the
   ScienceWorld runner.
 
-On Windows, command-line smoke tests can be run from PowerShell. WSL2 is
-recommended for benchmark runs and for installations that need to compile
-`hnswlib` or other native dependencies. All commands below assume the
-repository root as the working directory.
+On Windows, command-line smoke tests can be run from PowerShell. Native
+Windows installation of `hnswlib` may require Microsoft C++ Build Tools, so
+WSL2 is recommended for benchmark runs and native dependency installation.
+Commands containing `export`, `$PWD`, or Bash line continuations are written
+for Bash / WSL; translate environment assignments to PowerShell syntax when
+using a native shell. All commands below assume the repository root as the
+working directory.
 
 ## Installation
 
@@ -131,6 +134,15 @@ Install the locked base environment:
 ~~~bash
 uv python install 3.12.13
 uv sync --frozen
+~~~
+
+The project accepts any Python version in the 3.10-3.12 range. If your
+platform does not offer 3.12.13, install the latest available 3.12.x and
+select it explicitly:
+
+~~~bash
+uv python install 3.12
+uv sync --frozen --python 3.12
 ~~~
 
 Install the optional ALFWorld dependency only when that benchmark is needed:
@@ -209,6 +221,9 @@ set -a
 . ./.env
 set +a
 ~~~
+
+For PowerShell, set the router and credential variables with environment
+assignments before running ScienceWorld or the numbered ablations.
 
 ## Quick Start
 
@@ -670,7 +685,8 @@ uv run python -m compileall -q \
 The complete `tests/` suite includes integration tests that need a real model
 endpoint and workspace. Without those external services, a small number of
 integration failures is expected; it does not indicate that the model-free
-tests failed.
+tests failed. In the checked environment, the full suite finished with
+123 passed and 3 integration failures.
 
 ## Output Checks
 
