@@ -48,7 +48,7 @@ Large skill libraries broaden what an LLM agent can do, but they also make retri
 **CaSKG** builds a counterfactual-causal skill graph offline, then retrieves a compact, executable skill bundle for each task. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, direction-conditioned textual counterfactual probes assess a budgeted subset, and edge states determine which relations are published and how strongly they influence retrieval. By default, a bounded set of deferred, unvalidated candidates remains in the runtime graph as low-weight scaffold edges.
 
 <p align="center">
-  <img src="caskg_skill_graph_widescreen_input_edited.png"
+  <img src="caskg_skill_graph_widescreen_input_edited.svg"
        alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
        width="900">
 </p>
