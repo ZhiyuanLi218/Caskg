@@ -39,8 +39,6 @@
   🏠 <strong>ALFWorld ID-140</strong> &nbsp;·&nbsp;
   🔬 <strong>ScienceWorld U211</strong>
 </p> -->
-<a href="https://arxiv.org/abs/2608.25500">📄 Paper</a> &middot;
-<a href="#citation">Citation</a>
 <p align="center">
   <a href="#overview">Overview</a> &middot;
   <a href="#method">Method</a> &middot;
