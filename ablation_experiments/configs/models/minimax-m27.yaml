@@ -1,8 +1,0 @@
-model_id: MiniMax-M2.7
-model_slug: minimax-m27
-router_policy: strict
-expected_provider: aigcbest_chat
-provider_family: api2
-temperature: 0.0
-max_completion_tokens: 1024
-credentials: environment_only

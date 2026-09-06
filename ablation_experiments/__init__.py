@@ -1,2 +1,0 @@
-"""CaSKG ablation experiment package."""
-
