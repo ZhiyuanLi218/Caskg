@@ -150,7 +150,7 @@ Archived ALFWorld ID-140 aggregates compare CaSKG with GoS at nominal library si
 <p align="center">
   <img src="fig/fig_library_size_sensitivity.png"
        alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
-       width="760">
+       width="456">
 </p>
 
 <p align="center">
