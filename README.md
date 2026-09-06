@@ -7,14 +7,34 @@
 <p align="center">
   <a href="mailto:zhiyuanl24@mails.jlu.edu.cn"><strong>Zhiyuan Li</strong></a><sup>1,2,*</sup> &middot;
   <a href="mailto:lygao25@mails.jlu.edu.cn"><strong>Linyuan Gao</strong></a><sup>1,*</sup> &middot;
-  <a href="mailto:dingxuechun.dxc@antgroup.com"><strong>Xuechun Ding</strong></a><sup>2</sup> &middot;
+  <a href="mailto:dingxuechun.dxc@antgroup.com"><strong>Xuechun Ding</strong></a><sup>2</sup>
+  <br>
   <a href="mailto:wei.chenhw@antgroup.com"><strong>Hongwei Chen</strong></a><sup>2,&dagger;</sup> &middot;
   <a href="mailto:yuanwu@jlu.edu.cn"><strong>Yuan Wu</strong></a><sup>1,&dagger;</sup> &middot;
   <a href="mailto:yichang@jlu.edu.cn"><strong>Yi Chang</strong></a><sup>1</sup>
 </p>
 
 <p align="center">
-  <sup>1</sup> School of Artificial Intelligence, Jilin University &nbsp;&nbsp;
+  <a href="https://www.jlu.edu.cn/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/affiliations/jilin-university-badge-reverse.png">
+      <source media="(prefers-color-scheme: light)" srcset="assets/affiliations/jilin-university-badge.png">
+      <img src="assets/affiliations/jilin-university-badge.png" alt="Jilin University" height="54">
+    </picture>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.antgroup.com/en">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/affiliations/ant-group-logo-en-reverse-trimmed.png">
+      <source media="(prefers-color-scheme: light)" srcset="assets/affiliations/ant-group-logo-en-positive-trimmed.png">
+      <img src="assets/affiliations/ant-group-logo-en-positive-trimmed.png" alt="Ant Group" height="46">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <sup>1</sup> School of Artificial Intelligence, Jilin University
+  <br>
   <sup>2</sup> Ant Group
 </p>
 
@@ -26,6 +46,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10--3.12-3776ab?logo=python&logoColor=white" alt="Python 3.10-3.12">
+  <img src="https://img.shields.io/badge/Environment-uv-DE5FE9?logo=uv&logoColor=white" alt="uv environment">
+  <br>
   <img src="https://img.shields.io/badge/Skill%20Library-Skill1000-555555" alt="Skill1000">
   <img src="https://img.shields.io/badge/Benchmarks-ALFWorld%20%7C%20ScienceWorld-0b7285" alt="ALFWorld and ScienceWorld">
 </p>
@@ -34,7 +56,8 @@
   <a href="#overview">Overview</a> &middot;
   <a href="#results">Results</a> &middot;
   <a href="#installation">Installation</a> &middot;
-  <a href="#quick-start">Quick Start</a> &middot;
+  <a href="#quick-start">Quick Start</a>
+  <br>
   <a href="#agent-integration">Agent Integration</a> &middot;
   <a href="#evaluation">Evaluation</a>
 </p>
@@ -45,28 +68,33 @@
 
 Large skill libraries broaden what an LLM agent can do, but they also make retrieval harder. Full-library prompting introduces irrelevant procedures, independent vector retrieval can miss workflow dependencies, and graph expansion is useful only when the relations carrying relevance are reliable.
 
-**CaSKG** builds a counterfactual-causal skill graph offline, then retrieves a compact, executable skill bundle for each task. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, direction-conditioned textual counterfactual probes assess a budgeted subset, and edge states determine which relations are published and how strongly they influence retrieval. By default, a bounded set of deferred, unvalidated candidates remains in the runtime graph as low-weight scaffold edges.
+**CaSKG** builds a counterfactual-causal skill graph offline, then retrieves a compact, executable skill bundle for each task. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, counterfactual probes assess a budgeted subset, and edge states control publication and retrieval weight.
 
 <p align="center">
-  <img src="CaSKG_method_overview_final.png"
-       alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
-       width="900">
+  <a href="CaSKG_method_overview_final.png">
+    <picture>
+      <source srcset="assets/CaSKG_method_overview_final.svg" type="image/svg+xml">
+      <img src="assets/CaSKG_method_overview_final.png"
+           alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
+           width="100%">
+    </picture>
+  </a>
 </p>
 
 <p align="center">
-  <em>CaSKG constructs and calibrates the graph offline, then freezes it for task-time retrieval.</em>
+  <em><strong>Figure 1.</strong> Stages 1&ndash;3 construct and calibrate the graph offline; Stage 4 retrieves a task-conditioned skill bundle from the frozen graph.</em>
   <br>
-  <a href="assets/CaSKG_method_overview_final.pdf">High-resolution figure (PDF)</a>
+  <sub><a href="assets/CaSKG_method_overview_final.svg">SVG</a> &middot; <a href="assets/CaSKG_method_overview_final.png">Full-size PNG</a> &middot; <a href="assets/CaSKG_method_overview_final.pdf">Original PDF</a></sub>
 </p>
 
-**Pipeline.**
+### Method at a Glance
 
 1. **Candidate graph induction:** construct a high-recall directed graph from lexical, semantic, input/output, and structural evidence.
 2. **Counterfactual edge probing:** apply direction-conditioned removal, substitution, and reordering probes to a budgeted edge frontier, then aggregate the evidence with Beta smoothing.
 3. **State-gated publication:** retain confirmed relations, attenuate uncertain ones, reject unsupported ones, and, by default, keep a bounded low-weight scaffold of deferred candidates.
 4. **Task-conditioned retrieval:** seed from lexical and semantic matches, diffuse relevance over the frozen graph with personalized PageRank, and return a bounded skill bundle.
 
-The textual probes calibrate the operational reliability of proposed directed relations; they are not claims of real-world causality.
+> **Scope.** Deferred, unvalidated candidates remain in the default runtime graph only as bounded low-weight scaffold edges. The textual probes calibrate the operational reliability of proposed directed relations; they are not claims of real-world causality.
 
 ## Results
 
@@ -77,62 +105,77 @@ We evaluate four skill-access methods with a frozen **Skill1000** library across
 - **Graph-of-Skills (GoS):** retrieve over a dependency-aware skill graph.
 - **CaSKG:** retrieve over a state-weighted graph containing calibrated relations and bounded low-weight scaffold edges.
 
-The two complete interactive cohorts are **ALFWorld ID-140** (140 in-distribution household episodes) and **ScienceWorld U211** (211 selected episodes spanning 24 task types from the official test split). For ALFWorld, `R` is success rate in percent. For ScienceWorld, `R` is the arithmetic mean of each episode's best official score on the 0-to-100 scale and is not a percentage. **Steps** reproduces each runner's per-episode counter: ScienceWorld increments it on environment actions, while the current ALFWorld runner increments it once per agent turn, including retrieval or action-repair turns that may not call `env.step`. It does not measure tokens, latency, graph-construction cost, or success-conditioned efficiency. Higher `R` and fewer Steps are better.
+The complete interactive cohorts are **ALFWorld ID-140** (140 in-distribution household episodes) and **ScienceWorld U211** (211 selected official-test episodes spanning 24 task types). For ALFWorld, `R` is success rate in percent. For ScienceWorld, `R` is the arithmetic mean of each episode's best official score on the 0-to-100 scale and is not a percentage.
+
+**Steps** reproduces each runner's per-episode counter. ScienceWorld counts environment actions; the current ALFWorld runner counts agent turns, including retrieval or action-repair turns that may not call `env.step`. Steps does not measure tokens, latency, graph-construction cost, or success-conditioned efficiency. Higher `R` and fewer Steps are better.
 
 Within each benchmark, all methods use the same task cohort, base prompt, evaluator, episode limits, and environment interaction loop. The retrieval structure is frozen before evaluation and the retrieved skill context is the intended method-specific difference.
 
 ### Main Results (End-to-End)
 
-| Model | Method | ALFWorld R (%) | ALFWorld Steps | ScienceWorld R | ScienceWorld Steps |
-|---|---|---:|---:|---:|---:|
-| MiniMax-M2.7 | Vanilla | 42.90 | 22.54 | 45.90 | 21.73 |
-|  | Vector | 45.70 | 22.84 | 43.21 | 21.45 |
-|  | GoS | 63.60 | 19.69 | 55.85 | 18.91 |
-|  | **CaSKG** | **73.57** | **18.44** | **68.33** | **17.45** |
-| GLM-5.2 | Vanilla | 95.00 | 11.05 | 75.50 | 17.03 |
-|  | Vector | 96.43 | 10.12 | 77.07 | 16.65 |
-|  | GoS | 95.71 | 9.91 | 80.33 | 15.75 |
-|  | **CaSKG** | **97.86** | **9.69** | **85.11** | **14.52** |
-| Kimi-K2.6 | Vanilla | 77.90 | 16.07 | 72.23 | 18.91 |
-|  | Vector | 90.00 | 13.49 | 72.58 | 17.55 |
-|  | GoS | 93.60 | 13.08 | 76.82 | 16.15 |
-|  | **CaSKG** | **95.00** | **12.34** | **83.88** | **15.43** |
-| Qwen3.5-397B-A17B | Vanilla | 79.30 | 15.60 | 63.72 | 18.34 |
-|  | Vector | 78.60 | 15.49 | 62.60 | 18.51 |
-|  | GoS | 88.60 | 14.15 | 63.18 | 17.08 |
-|  | **CaSKG** | **92.14** | **11.60** | **74.97** | **15.56** |
-| DeepSeek-V4-Flash | Vanilla | 72.86 | 16.91 | 64.84 | 18.49 |
-|  | Vector | 78.57 | 16.89 | 68.65 | 18.39 |
-|  | GoS | 77.86 | 17.09 | 73.45 | 16.20 |
-|  | **CaSKG** | **86.43** | **14.41** | **83.40** | **15.61** |
-| GPT-5.6-Luna | Vanilla | 72.86 | **17.74** | 84.09 | 14.99 |
-|  | Vector | 55.00 | 22.06 | 84.09 | 14.40 |
-|  | GoS | 60.71 | 21.86 | 86.08 | 14.22 |
-|  | **CaSKG** | **75.71** | 17.79 | **87.33** | **13.18** |
+<table>
+  <tr>
+    <td align="center"><strong>12 / 12</strong><br><sub>highest observed task scores</sub></td>
+    <td align="center"><strong>11 / 12</strong><br><sub>fewest reported Steps</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>80.01 &rarr; 86.79</strong><br><sub>ALFWorld R (%), GoS &rarr; CaSKG</sub></td>
+    <td align="center"><strong>72.62 &rarr; 80.50</strong><br><sub>ScienceWorld R, GoS &rarr; CaSKG</sub></td>
+  </tr>
+</table>
 
-CaSKG achieves the highest task score in all **12 model-benchmark combinations**. Relative to GoS, the six-model macro-average improves from **80.01% to 86.79%** on ALFWorld and from **72.62 to 80.50** on ScienceWorld, while reported mean Steps fall from **15.96 to 14.05** and from **16.39 to 15.29**, respectively.
+#### ALFWorld ID-140
 
-CaSKG also uses fewer steps than GoS in every setting and has the lowest step count among all methods in 11 of 12 settings. The exception is GPT-5.6-Luna on ALFWorld, where Vanilla is 0.05 steps shorter but 2.85 percentage points less successful.
+Each cell shows **success rate `R (%)`** on the first line and **reported `Steps`** below. Bold marks the best observed value in each model row.
 
-### Scaling with Library Size
+| Model | Vanilla | Vector | GoS | **CaSKG** |
+|:---|---:|---:|---:|---:|
+| MiniMax-M2.7 | 42.90<br><sub>22.54</sub> | 45.70<br><sub>22.84</sub> | 63.60<br><sub>19.69</sub> | <strong>73.57</strong><br><sub><strong>18.44</strong></sub> |
+| GLM-5.2 | 95.00<br><sub>11.05</sub> | 96.43<br><sub>10.12</sub> | 95.71<br><sub>9.91</sub> | <strong>97.86</strong><br><sub><strong>9.69</strong></sub> |
+| Kimi-K2.6 | 77.90<br><sub>16.07</sub> | 90.00<br><sub>13.49</sub> | 93.60<br><sub>13.08</sub> | <strong>95.00</strong><br><sub><strong>12.34</strong></sub> |
+| Qwen3.5-397B-A17B | 79.30<br><sub>15.60</sub> | 78.60<br><sub>15.49</sub> | 88.60<br><sub>14.15</sub> | <strong>92.14</strong><br><sub><strong>11.60</strong></sub> |
+| DeepSeek-V4-Flash | 72.86<br><sub>16.91</sub> | 78.57<br><sub>16.89</sub> | 77.86<br><sub>17.09</sub> | <strong>86.43</strong><br><sub><strong>14.41</strong></sub> |
+| GPT-5.6-Luna | 72.86<br><sub><strong>17.74</strong></sub> | 55.00<br><sub>22.06</sub> | 60.71<br><sub>21.86</sub> | <strong>75.71</strong><br><sub>17.79</sub> |
 
-We compare CaSKG with GoS on ALFWorld ID-140 as the library grows from 200 to 2,000 skills.
+#### ScienceWorld U211
 
-> **Interpretation boundary.** This is an archived descriptive system-level comparison, not a fixed-budget complexity experiment. The MiniMax runs assess 500 candidate relations at 200 to 1,000 skills and 2,000 relations at 2,000 skills; the Qwen GoS values come from archived aggregates rather than matching episode directories.
+Each cell shows **mean best official score `R`** on the first line and **reported `Steps`** below. Bold marks the best observed value in each model row.
+
+| Model | Vanilla | Vector | GoS | **CaSKG** |
+|:---|---:|---:|---:|---:|
+| MiniMax-M2.7 | 45.90<br><sub>21.73</sub> | 43.21<br><sub>21.45</sub> | 55.85<br><sub>18.91</sub> | <strong>68.33</strong><br><sub><strong>17.45</strong></sub> |
+| GLM-5.2 | 75.50<br><sub>17.03</sub> | 77.07<br><sub>16.65</sub> | 80.33<br><sub>15.75</sub> | <strong>85.11</strong><br><sub><strong>14.52</strong></sub> |
+| Kimi-K2.6 | 72.23<br><sub>18.91</sub> | 72.58<br><sub>17.55</sub> | 76.82<br><sub>16.15</sub> | <strong>83.88</strong><br><sub><strong>15.43</strong></sub> |
+| Qwen3.5-397B-A17B | 63.72<br><sub>18.34</sub> | 62.60<br><sub>18.51</sub> | 63.18<br><sub>17.08</sub> | <strong>74.97</strong><br><sub><strong>15.56</strong></sub> |
+| DeepSeek-V4-Flash | 64.84<br><sub>18.49</sub> | 68.65<br><sub>18.39</sub> | 73.45<br><sub>16.20</sub> | <strong>83.40</strong><br><sub><strong>15.61</strong></sub> |
+| GPT-5.6-Luna | 84.09<br><sub>14.99</sub> | 84.09<br><sub>14.40</sub> | 86.08<br><sub>14.22</sub> | <strong>87.33</strong><br><sub><strong>13.18</strong></sub> |
+
+Across the six-model macro-average, CaSKG improves `R` from **80.01% to 86.79%** on ALFWorld and from **72.62 to 80.50** on ScienceWorld relative to GoS. Reported mean Steps fall from **15.96 to 14.05** and from **16.39 to 15.29**, respectively. The only global step-count exception is GPT-5.6-Luna on ALFWorld: Vanilla is 0.05 steps shorter, but its success rate is 2.85 percentage points lower.
+
+### Performance across Skill-Library Sizes
+
+Archived ALFWorld ID-140 aggregates compare CaSKG with GoS at nominal library sizes of 200, 500, 1,000, and 2,000 skills for MiniMax-M2.7 and Qwen3.5-397B-A17B.
+
+> **Interpretation boundary.** This is a descriptive system-level comparison, not a controlled size ablation, complexity experiment, or compute benchmark. The records do not establish that the four libraries are nested or differ only in size. MiniMax assesses 500 candidate relations at 200 to 1,000 skills and 2,000 relations at 2,000 skills; the Qwen GoS values are archived aggregates without matching episode directories.
 
 <p align="center">
-  <img src="assets/fig_library_size_sensitivity.png"
-       alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
-       width="720">
+  <a href="assets/fig_library_size_sensitivity.svg">
+    <picture>
+      <source srcset="assets/fig_library_size_sensitivity.svg" type="image/svg+xml">
+      <img src="assets/fig_library_size_sensitivity.png"
+           alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
+           width="720">
+    </picture>
+  </a>
 </p>
 
 <p align="center">
-  <em>Archived source figure; interpret its "environment steps" axis as the ALFWorld Steps counter defined above.</em>
+  <em><strong>Figure 2.</strong> Archived CaSKG and GoS results at four nominal skill-library sizes. Interpret "environment steps" as the ALFWorld agent-turn counter defined above.</em>
   <br>
-  <a href="assets/fig_library_size_sensitivity.pdf">High-resolution figure (PDF)</a>
+  <sub><a href="assets/fig_library_size_sensitivity.svg">SVG</a> &middot; <a href="assets/fig_library_size_sensitivity.png">Full-size PNG</a> &middot; <a href="assets/fig_library_size_sensitivity.pdf">Original PDF</a></sub>
 </p>
 
-Across all eight backbone-library-size combinations, CaSKG has both higher success and lower reported Steps than GoS. The success-rate advantage ranges from **+3.54 to +22.86 percentage points**, while the reduction ranges from **1.25 to 4.46 steps**. The best observed library size differs by backbone, so the curves should not be read as monotonic scaling laws.
+Across all eight archived backbone-size comparisons, CaSKG records higher success and lower reported Steps than GoS. The observed success difference ranges from **+3.54 to +22.86 percentage points**, while the reported Steps difference ranges from **1.25 to 4.46**. The best observed CaSKG success occurs at 1,000 skills for MiniMax and 500 for Qwen; neither CaSKG curve is monotonic. The evidence covers two backbones and one benchmark, without repeated-run variance or significance estimates.
 
 <details>
 <summary><strong>Exact values and comparison scope</strong></summary>
@@ -150,6 +193,23 @@ Across all eight backbone-library-size combinations, CaSKG has both higher succe
 
 </details>
 
+### Graph-Construction Component Analysis
+
+This comparison uses MiniMax-M2.7, Skill1000, ALFWorld ID-140, the same 140-task cohort, and a 30-step limit. `C`, `F`, and E<sub>pub</sub> denote candidate, counterfactually assessed, and published relations.
+
+| Variant | C | F | E<sub>pub</sub> | R (%) &uarr; | Steps &darr; |
+|:---|---:|---:|---:|---:|---:|
+| **Full CaSKG** | 9,937 | 500 | 3,292 | **73.57** | **18.44** |
+| Semantic-only candidates | 3,982 | 500 | 2,698 | 67.14 | 19.21 |
+| Without candidate-stage LLM judge | 9,753 | 500 | 3,188 | 71.43 | 18.79 |
+| Publish all candidates | 9,937 | 0 | 9,937 | 71.43 | 18.74 |
+
+- **Broad candidate induction:** Full CaSKG improves over semantic-only candidates by **6.43 percentage points** and reduces reported Steps by **0.77**.
+- **Judge-assisted candidate scoring:** Full CaSKG improves over the no-judge variant by **2.14 percentage points** and **0.35 Steps** under this configuration.
+- **Counterfactual assessment and state-gated publication:** Starting from the same 9,937 candidates, assessing a frontier and publishing 3,292 relations improves over publishing every candidate by **2.14 percentage points** and **0.30 Steps**.
+
+> **Ablation scope.** `F` counts counterfactually assessed relations, not probe calls. Published relations are not all validated relations because the runtime graph can include bounded unassessed scaffold edges. The no-judge variant removes only the candidate-stage judge and still uses later LLM counterfactual probes. Each row is a single cohort aggregate; no repeated-run uncertainty or significance test is available.
+
 <details>
 <summary><strong>Task-type and trajectory analysis</strong></summary>
 
@@ -163,7 +223,6 @@ On ScienceWorld, CaSKG improves over GoS on **21 of 24 task types**, ties on one
 These examples illustrate failure modes behind the aggregate table; they are not independent causal evidence.
 
 </details>
-
 
 ## Installation
 
@@ -440,7 +499,7 @@ Integration tests require configured model endpoints and, where applicable, a sk
 
 ```text
 .
-|-- assets/                 Method and scaling figures in PNG and PDF
+|-- assets/                 Method figures and affiliation marks
 |-- caskg/
 |   |-- causal/             Candidate induction, probes, edge states, publication
 |   |-- core/               Skill parsing, graph storage, online retrieval
