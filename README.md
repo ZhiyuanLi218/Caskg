@@ -39,7 +39,8 @@
   🏠 <strong>ALFWorld ID-140</strong> &nbsp;·&nbsp;
   🔬 <strong>ScienceWorld U211</strong>
 </p> -->
-
+<a href="https://arxiv.org/abs/2608.25500">📄 Paper</a> &middot;
+<a href="#citation">Citation</a>
 <p align="center">
   <a href="#overview">Overview</a> &middot;
   <a href="#method">Method</a> &middot;
@@ -423,3 +424,19 @@ uv run python -m compileall -q caskg experiments evaluation tests
 ```
 
 </details>
+
+<a id="citation"></a>
+## 📖 Citation
+
+Our paper is available on [arXiv](https://arxiv.org/abs/2608.25500).
+
+If you find CaSKG useful in your research, please cite:
+
+```bibtex
+@article{li2026caskg,
+  title   = {{CaSKG}: Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval},
+  author  = {Li, Zhiyuan and Gao, Linyuan and Ding, Xuechun and Chen, Hongwei and Wu, Yuan and Chang, Yi},
+  journal = {arXiv preprint arXiv:2608.25500},
+  year    = {2026}
+}
+```
