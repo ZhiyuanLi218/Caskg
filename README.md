@@ -4,11 +4,11 @@
   <strong>Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval</strong>
 </p>
 
-<p align="center">
+<!-- <p align="center">
   🧩 Candidate Graph Induction &nbsp;·&nbsp;
   🧪 Counterfactual Calibration &nbsp;·&nbsp;
   🎯 Task-Conditioned Retrieval
-</p>
+</p> -->
 
 <p align="center">
   <strong>Zhiyuan Li</strong><sup>1,2,*</sup> &middot;
@@ -33,20 +33,9 @@
 </p>
 
 <p align="center">
-  <sup>1</sup> School of Artificial Intelligence, Jilin University
-  &nbsp;·&nbsp;
-  <sup>2</sup> Ant Group
-  <br>
-  <sub><sup>*</sup> Equal contribution &nbsp;·&nbsp; <sup>&dagger;</sup> Co-corresponding authors</sub>
-  <br>
-  <sub>Work done while Zhiyuan Li was an intern at Ant Group.</sub>
-</p>
-
-<p align="center">
   🐍 <strong>Python 3.10-3.12</strong> &nbsp;·&nbsp;
   📦 <strong>uv</strong> &nbsp;·&nbsp;
-  📚 <strong>Skill1000</strong>
-  <br>
+  📚 <strong>Skill1000</strong>&nbsp;·&nbsp;
   🏠 <strong>ALFWorld ID-140</strong> &nbsp;·&nbsp;
   🔬 <strong>ScienceWorld U211</strong>
 </p>
@@ -56,8 +45,7 @@
   <a href="#method">Method</a> &middot;
   <a href="#results">Results</a> &middot;
   <a href="#installation">Installation</a> &middot;
-  <a href="#quick-start">Quick Start</a>
-  <br>
+  <a href="#quick-start">Quick Start</a> &middot;
   <a href="#agent-integration">Agent Integration</a> &middot;
   <a href="#evaluation">Evaluation</a>
 </p>
@@ -435,17 +423,3 @@ uv run python -m compileall -q caskg experiments evaluation tests
 ```
 
 </details>
-
-<a id="authors"></a>
-## 👥 Authors and Affiliations
-
-| Author | Affiliation(s) | Email | Note |
-|:---|:---|:---|:---|
-| Zhiyuan Li | Jilin University; Ant Group | [zhiyuanl24@mails.jlu.edu.cn](mailto:zhiyuanl24@mails.jlu.edu.cn) | Equal contribution; work done while an intern at Ant Group |
-| Linyuan Gao | Jilin University | [lygao25@mails.jlu.edu.cn](mailto:lygao25@mails.jlu.edu.cn) | Equal contribution |
-| Xuechun Ding | Ant Group | [dingxuechun.dxc@antgroup.com](mailto:dingxuechun.dxc@antgroup.com) |  |
-| Hongwei Chen | Ant Group | [wei.chenhw@antgroup.com](mailto:wei.chenhw@antgroup.com) | Co-corresponding author |
-| Yuan Wu | Jilin University | [yuanwu@jlu.edu.cn](mailto:yuanwu@jlu.edu.cn) | Co-corresponding author |
-| Yi Chang | Jilin University | [yichang@jlu.edu.cn](mailto:yichang@jlu.edu.cn) |  |
-
-The affiliation marks at the top identify the authors' institutions and do not imply endorsement of this repository. Their official sources are recorded in [`LOGO_SOURCES.md`](LOGO_SOURCES.md).
