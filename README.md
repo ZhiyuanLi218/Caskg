@@ -1,4 +1,4 @@
-<h1 align="center">🔗 CaSKG</h1>
+<h1 align="center"><img src="fig/caskg-graph-icon.png" alt="CaSKG graph" width="42"> CaSKG</h1>
 
 <p align="center">
   <strong>Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval</strong>
