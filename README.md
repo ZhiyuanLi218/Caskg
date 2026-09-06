@@ -32,13 +32,13 @@
   </picture>
 </p>
 
-<p align="center">
+<!-- <p align="center">
   🐍 <strong>Python 3.10-3.12</strong> &nbsp;·&nbsp;
   📦 <strong>uv</strong> &nbsp;·&nbsp;
   📚 <strong>Skill1000</strong>&nbsp;·&nbsp;
   🏠 <strong>ALFWorld ID-140</strong> &nbsp;·&nbsp;
   🔬 <strong>ScienceWorld U211</strong>
-</p>
+</p> -->
 
 <p align="center">
   <a href="#overview">Overview</a> &middot;
