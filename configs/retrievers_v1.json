@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "transport": "persistent_jsonl",
+  "methods": {
+    "caskg": {
+      "python": "python",
+      "project_root": ".",
+      "workspace": "data/caskg_workspace/skills_1000"
+    }
+  }
+}

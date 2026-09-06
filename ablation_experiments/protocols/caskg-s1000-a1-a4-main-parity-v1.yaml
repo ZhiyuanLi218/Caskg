@@ -1,0 +1,158 @@
+schema_version: 1
+protocol_id: caskg-s1000-a1-a4-main-parity-v1
+status: preregistered_before_formal_execution
+research_question: >-
+  Which retrieval and causal-graph components account for MiniMax Skill1000
+  performance under a concurrent API2 control and the accepted current evaluator?
+
+historical_a0:
+  rerun: false
+  model: MiniMax-M2.7
+  provider: historical_per_benchmark
+  router_policy: historical_strict
+  graph_sha256: ff64ad00ef7b35e29586ac59ed8bec07f0a1452555a9ff19f89712fd85654770
+  result_roots:
+    alfworld: results/historical/alfworld/MiniMax-M2.7
+    scienceworld: results/historical/scienceworld/MiniMax-M2.7
+  alfworld:
+    valid_episodes: 140
+    success_count: 103
+    success_rate: 0.7357142857142858
+    result_source: published_skill1000_main_experiment
+    provider: endpoint_not_recorded_in_episode_artifacts
+    reported_endpoint_in_historical_notes: redacted_for_anonymous_review
+    evaluator_sha256: a1f5adb7a2fb55dca0cd14c11b42747698f8cda5f3cfd14b5ddbae3c9378c32c
+    skill_module_sha256: da81093f71bbc397233f7b9e851c33c363f3128904e01ecc02b017e04e85c343
+    system_prompt_sha256: 6bcfe1a8e1e7a4639815a3bba046709d8c51147c0a5b44d52a495ca9ff876803
+  scienceworld:
+    valid_episodes: 211
+    episode_mean_best_official_score: 68.33175355450237
+    full_success_rate: 0.4312796208530806
+    provider: yunwu
+    realized_evaluator_fingerprint: a5aac3d1988ad4a0050f2bedb3ad8759fa998123a604db414d7686627562ae92
+    prompt_sha256: 036a5081d7cc288e1494025297a51d6b9fe0170675fc3f6b17320c125ab7a7e5
+
+variants:
+  p0-api2-full-control:
+    role: concurrent_full_caskg_control
+    graph: byte_identical_to_a0_via_a1_workspace
+    retrieval: normal_hybrid_ppr
+    purpose: provider_and_evaluator_matched_control_for_a1_a4
+  a1-vector-only-no-ppr:
+    isolated_variable: graph_propagation
+    treatment: vector_top_n_only
+    graph: byte_identical_to_a0
+    ppr: disabled
+    lexical_expansion: disabled
+    prompt_surface: caskg_main_parity_unchanged
+  a2-matched-rewired-s7302:
+    isolated_variable: graph_topology
+    treatment: within_type_degree_preserving_target_rewire
+    random_seed: 7302
+    minimum_endpoint_change_rate: 0.95
+  a3-fixed-topology-phase1-weights:
+    isolated_variable: phase2_runtime_weighting
+    treatment: weight_and_confidence_equal_phase1_association_score
+    topology: exact_a0
+  a4-phase2-evidence-shuffle-s7301:
+    isolated_variable: phase2_evidence_location
+    treatment: matched_complete_evidence_package_swap
+    random_seed: 7301
+    topology: exact_a0
+
+locked_controls:
+  model: MiniMax-M2.7
+  chat_provider: aigcbest_chat
+  router_policy: strict
+  embedding_provider: aigcbest_embedding
+  embedding_model: Qwen/Qwen3-Embedding-8B
+  embedding_dimension: 4096
+  shared_sqlite_embedding_cache: true
+  skill_library: skills_1000
+  node_count: 1000
+  edge_count: 3292
+  query_rewrite: false
+  dynamic_skill_requests: enabled_where_supported_by_historical_a0
+  relation_text_to_agent: unchanged
+  max_steps: 30
+  workers_per_variant: 4
+  maximum_total_workers: 8
+  temperature_and_completion_limits: historical_main_experiment
+  scienceworld_formal_evaluator_fingerprint: 6973cd44cf0a64bc829648250d54f1364b194212fcb5dd222148e279d17c023a
+  outcome_independent_result_retention: true
+  normal_results_may_not_be_deleted_or_excluded_if_a0_loses: true
+
+parity_contract:
+  future_ablation_provider:
+    chat: aigcbest_chat
+    embedding: aigcbest_embedding
+    route_family: api2
+    policy: strict
+  historical_a0_provider_match: false
+  historical_a0_provider_reason: >-
+    The published ScienceWorld A0 records yunwu and the ALFWorld episode
+    artifacts do not contain provider provenance; MiniMax is intentionally
+    removed from Yunwu for all future runs.
+  evaluator:
+    alfworld_sha256: a1f5adb7a2fb55dca0cd14c11b42747698f8cda5f3cfd14b5ddbae3c9378c32c
+    scienceworld_historical_a0_fingerprint: a5aac3d1988ad4a0050f2bedb3ad8759fa998123a604db414d7686627562ae92
+    scienceworld_accepted_formal_fingerprint: 6973cd44cf0a64bc829648250d54f1364b194212fcb5dd222148e279d17c023a
+  prompt:
+    alfworld_sha256: 6bcfe1a8e1e7a4639815a3bba046709d8c51147c0a5b44d52a495ca9ff876803
+    scienceworld_sha256: 036a5081d7cc288e1494025297a51d6b9fe0170675fc3f6b17320c125ab7a7e5
+  task_manifest:
+    alfworld: ablation_experiments/manifests/generated/alfworld-s1000-main-a0-task-manifest-v1.json
+    scienceworld: manifests/scienceworld_eto_skillnet_unseen211_v1.jsonl
+  strict_gate: >-
+    Abort before paid execution if any accepted-current evaluator, prompt, task
+    identity, graph, embedding, or provider contract fails.
+
+benchmarks:
+  alfworld-id140:
+    split: eval_in_distribution
+    episode_count: 140
+    top_n: 15
+    max_steps: 30
+    primary_metric: success_rate
+  scienceworld-unseen211:
+    split: test
+    simplification: easy
+    episode_count: 211
+    top_n: 8
+    max_steps: 30
+    primary_metric: episode_mean_best_official_score
+
+execution:
+  formal_runs_per_variant: 1
+  automatic_pass_retry: false
+  infrastructure_failures_are_not_model_failures: true
+  launch_groups:
+    - [p0-api2-full-control, a1-vector-only-no-ppr]
+    - [a2-matched-rewired-s7302, a3-fixed-topology-phase1-weights]
+    - [a4-phase2-evidence-shuffle-s7301]
+  required_before_launch:
+    - graph_unit_tests_pass
+    - runtime_unit_tests_pass
+    - source_and_evaluator_hashes_match
+    - retrieval_preflight_pass
+    - exact_formal_command_confirmed_by_user
+
+analysis:
+  historical_a0_contrasts_are_descriptive_only: true
+  strict_provider_matched_control: P0-api2-full-control
+  strict_provider_matched_control_requirement: >-
+    P0 must run the full, unablated CaSKG pipeline through the same API2
+    providers, accepted-current evaluator fingerprint, prompt, task manifest,
+    workers, and time window as A1-A4 before their differences are analyzed.
+  primary_contrasts:
+    - P0_minus_A1
+    - P0_minus_A2
+    - P0_minus_A3
+    - P0_minus_A4
+  paired_bootstrap_samples: 10000
+  confidence_level: 0.95
+  alfworld_additional_test: exact_mcnemar
+  scienceworld_full_success_analysis: exact_mcnemar
+  multiplicity_correction: holm_across_four_primary_contrasts_per_benchmark
+  report_effect_sizes_even_when_interval_crosses_zero: true
+  historical_nonconcurrent_a0_limitation_must_be_reported: true

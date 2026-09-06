@@ -1,0 +1,22 @@
+schema_version: 1
+protocol_id: caskg-s1000-a1-a4-main-parity-v1
+variant_id: a1-vector-only-no-ppr
+number: A1
+treatment: vector_only_no_ppr
+workspace_graph: byte_identical_a0
+runtime:
+  public_mode: caskg
+  async_retrieve_implementation: async_retrieve_vector
+  dynamic_request_command: CASKG_RETRIEVE
+  ppr_damping: 0.0
+  relations_returned: false
+fixed:
+  prompt: historical_a0
+  evaluator: historical_a0
+  model: MiniMax-M2.7
+  provider: aigcbest_chat
+  top_n: benchmark_locked
+acceptance:
+  graph_sha256_identical_to_a0: true
+  retrieval_audit_ppr_damping_zero: true
+  retrieval_audit_relation_count_zero: true

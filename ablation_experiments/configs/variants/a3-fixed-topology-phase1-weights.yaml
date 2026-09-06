@@ -1,0 +1,21 @@
+schema_version: 1
+protocol_id: caskg-s1000-a1-a4-main-parity-v1
+variant_id: a3-fixed-topology-phase1-weights
+number: A3
+treatment: phase1_runtime_weights_on_fixed_a0_topology
+phase1_checkpoint_sha256: dd46baaab214491ebcf75b769d4608e067abc5aefbf8b97253edad7924816be0
+changed_fields:
+  - weight
+  - confidence
+assignment:
+  weight: association_score
+  confidence: association_score
+fixed:
+  topology: exact_a0
+  association_score: exact_a0
+  phase2_metadata: exact_a0
+  descriptions_and_chunks: exact_a0
+acceptance:
+  all_3292_a0_edges_have_unique_phase1_match: true
+  no_imputation: true
+  all_other_fields_byte_value_equal: true

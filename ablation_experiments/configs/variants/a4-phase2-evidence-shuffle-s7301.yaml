@@ -1,0 +1,26 @@
+schema_version: 1
+protocol_id: caskg-s1000-a1-a4-main-parity-v1
+variant_id: a4-phase2-evidence-shuffle-s7301
+number: A4
+treatment: matched_phase2_evidence_package_shuffle
+random_seed: 7301
+package_fields:
+  - status
+  - causal_score
+  - uncertainty
+  - alpha_posterior
+  - beta_posterior
+  - intervention_count
+  - transportability
+  - last_validated_episode
+  - weight
+  - confidence
+fixed:
+  topology: exact_a0
+  association_score: exact_a0
+  description: exact_a0_at_original_endpoint
+  chunks: exact_a0_at_original_endpoint
+acceptance:
+  validated_packages_displaced: 285
+  package_multiset_exact: true
+  global_fallback_count: 0

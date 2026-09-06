@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "protocol_id": "scienceworld-eto-skillnet-unseen211-v1",
+  "benchmark": {
+    "name": "ScienceWorld",
+    "version": "1.2.3",
+    "profile": "ETO-SkillNet-Unseen-211",
+    "split": "test",
+    "episode_count": 211,
+    "task_type_count": 24,
+    "simplification": "easy",
+    "agent_turn_limit": 30,
+    "environment_step_limit": 30
+  },
+  "selection": {
+    "source": "SkillNet test_indices.json; semantically identical to ETO test_indices.json",
+    "strategy": "published_order_first_up_to_10_official_test_variations_per_task",
+    "expected_episode_count": 211,
+    "max_variations_per_task": 10,
+    "attempts_per_episode": 1,
+    "excluded_official_task_types": [
+      "inclined-plane-determine-angle",
+      "inclined-plane-friction-named-surfaces",
+      "inclined-plane-friction-unnamed-surfaces",
+      "measure-melting-point-unknown-substance",
+      "mendelian-genetics-known-plant",
+      "mendelian-genetics-unknown-plant"
+    ]
+  },
+  "assets": {
+    "source_indices": "manifests/sources/skillnet_test_indices_7bb9a48.json",
+    "source_indices_sha256": "d6fe951ee08bd5dbc08c72355bb68e672fd51a91e15dea1da57d0f794f1dedbe",
+    "manifest": "manifests/scienceworld_eto_skillnet_unseen211_v1.jsonl",
+    "manifest_sha256": "170d353b48b43231071b8140eec4143eb5d9b97efe1bc1470d025448e33c3085",
+    "provenance": "manifests/scienceworld_eto_skillnet_unseen211_sources.json",
+    "prompt": "prompts/skillnet_scienceworld_system_v1.json",
+    "prompt_sha256": "036a5081d7cc288e1494025297a51d6b9fe0170675fc3f6b17320c125ab7a7e5"
+  },
+  "scoring": {
+    "primary": "episode_mean_best_official_score",
+    "score_scale": "0_to_100",
+    "episode_score": "maximum_info_score_observed",
+    "full_success": "best_official_score_ge_100",
+    "secondary": [
+      "macro_mean_task_score",
+      "full_success_rate",
+      "mean_environment_steps",
+      "mean_wall_seconds",
+      "llm_calls",
+      "token_usage",
+      "retrieval_latency_seconds",
+      "infrastructure_error_count"
+    ]
+  },
+  "retrieval": {
+    "trigger": "episode_start_once",
+    "query_source": "raw_task_description",
+    "top_n": 8,
+    "max_chars_per_skill": 2400,
+    "max_context_chars": 12000,
+    "query_rewrite": false,
+    "injection_format": "shared_skill_context_v1"
+  },
+  "agent": {
+    "temperature": 0.0,
+    "max_completion_tokens": 1024,
+    "max_prompt_chars": 100000,
+    "max_action_parse_repairs": 0,
+    "action_selection": "first_skillnet_action_regex",
+    "include_initial_observation": false,
+    "history_update": "assistant_response_then_environment_observation"
+  },
+  "execution": {
+    "scheduler": "thread_pool_worker_local_resources_v1",
+    "worker_resource_isolation": "one_retriever_and_chat_client_per_worker",
+    "result_writes": "atomic_per_episode_main_thread_summary",
+    "router_policy": "strict",
+    "formal_workers_per_method": 4,
+    "paired_total_workers": 8,
+    "paired_methods": [
+      "gos",
+      "caskg"
+    ],
+    "method_schedule": "paired_parallel_by_model_then_sequential_models",
+    "formal_model_order": [
+      "MiniMax-M2.7",
+      "gpt-5.4-mini",
+      "claude-opus-4-8"
+    ]
+  },
+  "reliability": {
+    "request_attempts": 20,
+    "request_timeout_seconds": 120,
+    "retry_base_delay_seconds": 5,
+    "retry_max_delay_seconds": 60,
+    "episode_attempts": 5,
+    "episode_retry_base_delay_seconds": 15,
+    "episode_retry_max_delay_seconds": 60,
+    "infrastructure_errors_excluded_from_model_score": true
+  },
+  "metrics": {
+    "primary": "episode_mean_best_official_score",
+    "report_score_as": "0_to_100",
+    "formal_result_requires_all_211_valid": true
+  },
+  "fairness": {
+    "paired_manifest": true,
+    "same_model_route_required": true,
+    "same_prompt_required": true,
+    "same_action_parser_required": true,
+    "same_retrieval_query_required": true,
+    "same_retrieval_budget_required": true,
+    "same_worker_count_required": true,
+    "valid_pair_required_for_comparison": true,
+    "only_intended_difference": "retrieval_method_and_its_matching_prebuilt_workspace"
+  }
+}

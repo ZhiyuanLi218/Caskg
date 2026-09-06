@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "protocol_id": "caskg-s1000-a1-a4-main-parity-v1",
+  "transport": "persistent_jsonl",
+  "methods": {
+    "caskg": {
+      "python": "python",
+      "project_root": ".",
+      "workspace": "ablation_experiments/graph_views/generated/a1-a4-main-parity-v1/a2-matched-rewired-s7302/workspace",
+      "variant": "a2-matched-rewired-s7302",
+      "embedding_cache": "ablation_experiments/cache/a1-a4-main-parity-v1/query_embeddings.sqlite3",
+      "audit_dir": "ablation_experiments/audits/runtime/a1-a4-main-parity-v1/a2-matched-rewired-s7302/scienceworld"
+    }
+  }
+}

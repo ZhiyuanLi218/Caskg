@@ -1,0 +1,13 @@
+variant_id: a0-full-reference
+label: A0 Full CaSKG
+agent_evaluation: reuse_existing_reference
+source_graph: original_published_graph_with_relation_neutral_runtime_view
+use_hybrid_seeds: true
+use_ppr: true
+show_relation_text: false
+relation_text_control: core_identity_edge_sentinel_is
+required_validation:
+  - retrieval_output_parity
+  - rendered_prompt_parity
+  - source_workspace_hash_match
+  - relation_text_absent
