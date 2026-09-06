@@ -164,18 +164,6 @@ These examples illustrate failure modes behind the aggregate table; they are not
 
 </details>
 
-## Citation
-
-Publication metadata will be updated when the paper is publicly released. For the current manuscript, use:
-
-```bibtex
-@misc{li2026caskg,
-  title  = {CaSKG: Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval},
-  author = {Li, Zhiyuan and Gao, Linyuan and Ding, Xuechun and Chen, Hongwei and Wu, Yuan and Chang, Yi},
-  year   = {2026},
-  note   = {Manuscript}
-}
-```
 
 ## Installation
 
