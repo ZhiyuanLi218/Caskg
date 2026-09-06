@@ -22,13 +22,13 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="jilin-university-badge-reverse.png">
-    <img src="jilin-university-badge.png" alt="Jilin University" height="52">
+    <source media="(prefers-color-scheme: dark)" srcset="fig/jilin-university-badge-reverse.png">
+    <img src="fig/jilin-university-badge.png" alt="Jilin University" height="52">
   </picture>
   &nbsp;&nbsp;&nbsp;
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="ant-group-logo-en-reverse-trimmed.png">
-    <img src="ant-group-logo-en-positive-trimmed.png" alt="Ant Group" height="46">
+    <source media="(prefers-color-scheme: dark)" srcset="fig/ant-group-logo-en-reverse-trimmed.png">
+    <img src="fig/ant-group-logo-en-positive-trimmed.png" alt="Ant Group" height="46">
   </picture>
 </p>
 
@@ -72,7 +72,7 @@ Large skill libraries broaden what an LLM agent can do, but they also make retri
 **CaSKG** constructs a counterfactual-causal skill graph offline and retrieves a compact, executable skill bundle at task time. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, counterfactual probes assess a budgeted subset, and edge states determine publication and retrieval weight.
 
 <p align="center">
-  <img src="CaSKG_method_overview_final.png"
+  <img src="fig/CaSKG_method_overview_final.png"
        alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
        width="900">
 </p>
@@ -148,7 +148,7 @@ Across the six-model macro-average, CaSKG improves `R` from **80.01% to 86.79%**
 Archived ALFWorld ID-140 aggregates compare CaSKG with GoS at nominal library sizes of 200, 500, 1,000, and 2,000 skills for MiniMax-M2.7 and Qwen3.5-397B-A17B.
 
 <p align="center">
-  <img src="fig_library_size_sensitivity.png"
+  <img src="fig/fig_library_size_sensitivity.png"
        alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
        width="760">
 </p>
