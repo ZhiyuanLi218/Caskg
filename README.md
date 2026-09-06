@@ -1,59 +1,59 @@
-<h1 align="center">CaSKG</h1>
+<h1 align="center">🔗 CaSKG</h1>
 
 <p align="center">
   <strong>Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval</strong>
 </p>
 
 <p align="center">
-  <a href="mailto:zhiyuanl24@mails.jlu.edu.cn"><strong>Zhiyuan Li</strong></a><sup>1,2,*</sup> &middot;
-  <a href="mailto:lygao25@mails.jlu.edu.cn"><strong>Linyuan Gao</strong></a><sup>1,*</sup> &middot;
-  <a href="mailto:dingxuechun.dxc@antgroup.com"><strong>Xuechun Ding</strong></a><sup>2</sup>
-  <br>
-  <a href="mailto:wei.chenhw@antgroup.com"><strong>Hongwei Chen</strong></a><sup>2,&dagger;</sup> &middot;
-  <a href="mailto:yuanwu@jlu.edu.cn"><strong>Yuan Wu</strong></a><sup>1,&dagger;</sup> &middot;
-  <a href="mailto:yichang@jlu.edu.cn"><strong>Yi Chang</strong></a><sup>1</sup>
+  🧩 Candidate Graph Induction &nbsp;·&nbsp;
+  🧪 Counterfactual Calibration &nbsp;·&nbsp;
+  🎯 Task-Conditioned Retrieval
 </p>
 
 <p align="center">
-  <a href="https://www.jlu.edu.cn/">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/affiliations/jilin-university-badge-reverse.png">
-      <source media="(prefers-color-scheme: light)" srcset="assets/affiliations/jilin-university-badge.png">
-      <img src="assets/affiliations/jilin-university-badge.png" alt="Jilin University" height="54">
-    </picture>
-  </a>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.antgroup.com/en">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/affiliations/ant-group-logo-en-reverse-trimmed.png">
-      <source media="(prefers-color-scheme: light)" srcset="assets/affiliations/ant-group-logo-en-positive-trimmed.png">
-      <img src="assets/affiliations/ant-group-logo-en-positive-trimmed.png" alt="Ant Group" height="46">
-    </picture>
-  </a>
+  <strong>Zhiyuan Li</strong><sup>1,2,*</sup> &middot;
+  <strong>Linyuan Gao</strong><sup>1,*</sup> &middot;
+  <strong>Xuechun Ding</strong><sup>2</sup> &middot;
+  <strong>Hongwei Chen</strong><sup>2,&dagger;</sup>
+  <br>
+  <strong>Yuan Wu</strong><sup>1,&dagger;</sup> &middot;
+  <strong>Yi Chang</strong><sup>1</sup>
+</p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="jilin-university-badge-reverse.png">
+    <img src="jilin-university-badge.png" alt="Jilin University" height="52">
+  </picture>
+  &nbsp;&nbsp;&nbsp;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="ant-group-logo-en-reverse-trimmed.png">
+    <img src="ant-group-logo-en-positive-trimmed.png" alt="Ant Group" height="46">
+  </picture>
 </p>
 
 <p align="center">
   <sup>1</sup> School of Artificial Intelligence, Jilin University
-  <br>
+  &nbsp;·&nbsp;
   <sup>2</sup> Ant Group
-</p>
-
-<p align="center">
-  <sup>*</sup> Equal contribution &nbsp;&nbsp; <sup>&dagger;</sup> Co-corresponding authors
+  <br>
+  <sub><sup>*</sup> Equal contribution &nbsp;·&nbsp; <sup>&dagger;</sup> Co-corresponding authors</sub>
   <br>
   <sub>Work done while Zhiyuan Li was an intern at Ant Group.</sub>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10--3.12-3776ab?logo=python&logoColor=white" alt="Python 3.10-3.12">
-  <img src="https://img.shields.io/badge/Environment-uv-DE5FE9?logo=uv&logoColor=white" alt="uv environment">
+  🐍 <strong>Python 3.10-3.12</strong> &nbsp;·&nbsp;
+  📦 <strong>uv</strong> &nbsp;·&nbsp;
+  📚 <strong>Skill1000</strong>
   <br>
-  <img src="https://img.shields.io/badge/Skill%20Library-Skill1000-555555" alt="Skill1000">
-  <img src="https://img.shields.io/badge/Benchmarks-ALFWorld%20%7C%20ScienceWorld-0b7285" alt="ALFWorld and ScienceWorld">
+  🏠 <strong>ALFWorld ID-140</strong> &nbsp;·&nbsp;
+  🔬 <strong>ScienceWorld U211</strong>
 </p>
 
 <p align="center">
   <a href="#overview">Overview</a> &middot;
+  <a href="#method">Method</a> &middot;
   <a href="#results">Results</a> &middot;
   <a href="#installation">Installation</a> &middot;
   <a href="#quick-start">Quick Start</a>
@@ -64,39 +64,35 @@
 
 ---
 
-## Overview
+<a id="overview"></a>
+## 🧩 CaSKG at a Glance
 
 Large skill libraries broaden what an LLM agent can do, but they also make retrieval harder. Full-library prompting introduces irrelevant procedures, independent vector retrieval can miss workflow dependencies, and graph expansion is useful only when the relations carrying relevance are reliable.
 
-**CaSKG** builds a counterfactual-causal skill graph offline, then retrieves a compact, executable skill bundle for each task. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, counterfactual probes assess a budgeted subset, and edge states control publication and retrieval weight.
+**CaSKG** constructs a counterfactual-causal skill graph offline and retrieves a compact, executable skill bundle at task time. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, counterfactual probes assess a budgeted subset, and edge states determine publication and retrieval weight.
 
 <p align="center">
-  <a href="CaSKG_method_overview_final.png">
-    <picture>
-      <source srcset="assets/CaSKG_method_overview_final.svg" type="image/svg+xml">
-      <img src="assets/CaSKG_method_overview_final.png"
-           alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
-           width="100%">
-    </picture>
-  </a>
+  <img src="CaSKG_method_overview_final.png"
+       alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
+       width="900">
 </p>
 
 <p align="center">
-  <em><strong>Figure 1.</strong> Stages 1&ndash;3 construct and calibrate the graph offline; Stage 4 retrieves a task-conditioned skill bundle from the frozen graph.</em>
-  <br>
-  <sub><a href="assets/CaSKG_method_overview_final.svg">SVG</a> &middot; <a href="assets/CaSKG_method_overview_final.png">Full-size PNG</a> &middot; <a href="assets/CaSKG_method_overview_final.pdf">Original PDF</a></sub>
+  <em><strong>Figure 1.</strong> Stages 1-3 construct and calibrate the graph offline; Stage 4 retrieves a task-conditioned skill bundle from the frozen graph.</em>
 </p>
 
-### Method at a Glance
+<a id="method"></a>
+## ⚙️ Method
 
-1. **Candidate graph induction:** construct a high-recall directed graph from lexical, semantic, input/output, and structural evidence.
-2. **Counterfactual edge probing:** apply direction-conditioned removal, substitution, and reordering probes to a budgeted edge frontier, then aggregate the evidence with Beta smoothing.
-3. **State-gated publication:** retain confirmed relations, attenuate uncertain ones, reject unsupported ones, and, by default, keep a bounded low-weight scaffold of deferred candidates.
-4. **Task-conditioned retrieval:** seed from lexical and semantic matches, diffuse relevance over the frozen graph with personalized PageRank, and return a bounded skill bundle.
+1. **Candidate graph induction.** Construct a high-recall directed graph from lexical, semantic, input/output, structural, and existing-relation evidence.
+2. **Counterfactual edge probing.** Apply direction-conditioned removal, substitution, and reordering probes to a budgeted edge frontier, then aggregate the evidence with Beta smoothing.
+3. **State-gated publication.** Retain confirmed relations, attenuate uncertain ones, reject unsupported ones, and keep a bounded low-weight scaffold of deferred candidates by default.
+4. **Task-conditioned retrieval.** Seed from lexical and semantic matches, diffuse relevance over the frozen graph with personalized PageRank, and return a bounded skill bundle.
 
-> **Scope.** Deferred, unvalidated candidates remain in the default runtime graph only as bounded low-weight scaffold edges. The textual probes calibrate the operational reliability of proposed directed relations; they are not claims of real-world causality.
+> **Scope.** The textual probes calibrate the operational reliability of proposed directed relations; they are not claims of real-world causality. Deferred, unvalidated candidates can remain only as bounded low-weight scaffold edges in the default runtime graph.
 
-## Results
+<a id="results"></a>
+## 📊 Results
 
 We evaluate four skill-access methods with a frozen **Skill1000** library across six LLM backbones:
 
@@ -105,132 +101,110 @@ We evaluate four skill-access methods with a frozen **Skill1000** library across
 - **Graph-of-Skills (GoS):** retrieve over a dependency-aware skill graph.
 - **CaSKG:** retrieve over a state-weighted graph containing calibrated relations and bounded low-weight scaffold edges.
 
-The complete interactive cohorts are **ALFWorld ID-140** (140 in-distribution household episodes) and **ScienceWorld U211** (211 selected official-test episodes spanning 24 task types). For ALFWorld, `R` is success rate in percent. For ScienceWorld, `R` is the arithmetic mean of each episode's best official score on the 0-to-100 scale and is not a percentage.
+The evaluation uses **ALFWorld ID-140** (140 in-distribution household episodes) and **ScienceWorld U211** (211 selected official-test episodes across 24 task types). ALFWorld `R` is success rate in percent; ScienceWorld `R` is the mean best official score on the 0-to-100 scale. `Steps` reproduces each runner's episode counter: agent turns for the current ALFWorld runner and environment actions for ScienceWorld.
 
-**Steps** reproduces each runner's per-episode counter. ScienceWorld counts environment actions; the current ALFWorld runner counts agent turns, including retrieval or action-repair turns that may not call `env.step`. Steps does not measure tokens, latency, graph-construction cost, or success-conditioned efficiency. Higher `R` and fewer Steps are better.
+### 🏆 Main Results (End-to-End)
 
-Within each benchmark, all methods use the same task cohort, base prompt, evaluator, episode limits, and environment interaction loop. The retrieval structure is frozen before evaluation and the retrieved skill context is the intended method-specific difference.
+<p align="center">
+  <strong>🏆 Highest observed task score in 12/12 model-benchmark settings</strong>
+  &nbsp;·&nbsp;
+  <strong>⚡ Fewest reported Steps in 11/12 settings</strong>
+</p>
 
-### Main Results (End-to-End)
+Higher `R` and fewer `Steps` are better. Bold numbers mark the best observed result for each model and metric.
 
-<table>
-  <tr>
-    <td align="center"><strong>12 / 12</strong><br><sub>highest observed task scores</sub></td>
-    <td align="center"><strong>11 / 12</strong><br><sub>fewest reported Steps</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><strong>80.01 &rarr; 86.79</strong><br><sub>ALFWorld R (%), GoS &rarr; CaSKG</sub></td>
-    <td align="center"><strong>72.62 &rarr; 80.50</strong><br><sub>ScienceWorld R, GoS &rarr; CaSKG</sub></td>
-  </tr>
-</table>
+| Model | Method | ALFWorld R (%) ↑ | ALFWorld Steps ↓ | ScienceWorld R ↑ | ScienceWorld Steps ↓ |
+|:---|:---|---:|---:|---:|---:|
+| MiniMax-M2.7 | Vanilla | 42.90 | 22.54 | 45.90 | 21.73 |
+|  | Vector | 45.70 | 22.84 | 43.21 | 21.45 |
+|  | GoS | 63.60 | 19.69 | 55.85 | 18.91 |
+|  | **CaSKG** | **73.57** | **18.44** | **68.33** | **17.45** |
+| GLM-5.2 | Vanilla | 95.00 | 11.05 | 75.50 | 17.03 |
+|  | Vector | 96.43 | 10.12 | 77.07 | 16.65 |
+|  | GoS | 95.71 | 9.91 | 80.33 | 15.75 |
+|  | **CaSKG** | **97.86** | **9.69** | **85.11** | **14.52** |
+| Kimi-K2.6 | Vanilla | 77.90 | 16.07 | 72.23 | 18.91 |
+|  | Vector | 90.00 | 13.49 | 72.58 | 17.55 |
+|  | GoS | 93.60 | 13.08 | 76.82 | 16.15 |
+|  | **CaSKG** | **95.00** | **12.34** | **83.88** | **15.43** |
+| Qwen3.5-397B-A17B | Vanilla | 79.30 | 15.60 | 63.72 | 18.34 |
+|  | Vector | 78.60 | 15.49 | 62.60 | 18.51 |
+|  | GoS | 88.60 | 14.15 | 63.18 | 17.08 |
+|  | **CaSKG** | **92.14** | **11.60** | **74.97** | **15.56** |
+| DeepSeek-V4-Flash | Vanilla | 72.86 | 16.91 | 64.84 | 18.49 |
+|  | Vector | 78.57 | 16.89 | 68.65 | 18.39 |
+|  | GoS | 77.86 | 17.09 | 73.45 | 16.20 |
+|  | **CaSKG** | **86.43** | **14.41** | **83.40** | **15.61** |
+| GPT-5.6-Luna | Vanilla | 72.86 | **17.74** | 84.09 | 14.99 |
+|  | Vector | 55.00 | 22.06 | 84.09 | 14.40 |
+|  | GoS | 60.71 | 21.86 | 86.08 | 14.22 |
+|  | **CaSKG** | **75.71** | 17.79 | **87.33** | **13.18** |
 
-#### ALFWorld ID-140
+Across the six-model macro-average, CaSKG improves `R` from **80.01% to 86.79%** on ALFWorld and from **72.62 to 80.50** on ScienceWorld relative to GoS. Reported mean Steps fall from **15.96 to 14.05** and from **16.39 to 15.29**, respectively.
 
-Each cell shows **success rate `R (%)`** on the first line and **reported `Steps`** below. Bold marks the best observed value in each model row.
-
-| Model | Vanilla | Vector | GoS | **CaSKG** |
-|:---|---:|---:|---:|---:|
-| MiniMax-M2.7 | 42.90<br><sub>22.54</sub> | 45.70<br><sub>22.84</sub> | 63.60<br><sub>19.69</sub> | <strong>73.57</strong><br><sub><strong>18.44</strong></sub> |
-| GLM-5.2 | 95.00<br><sub>11.05</sub> | 96.43<br><sub>10.12</sub> | 95.71<br><sub>9.91</sub> | <strong>97.86</strong><br><sub><strong>9.69</strong></sub> |
-| Kimi-K2.6 | 77.90<br><sub>16.07</sub> | 90.00<br><sub>13.49</sub> | 93.60<br><sub>13.08</sub> | <strong>95.00</strong><br><sub><strong>12.34</strong></sub> |
-| Qwen3.5-397B-A17B | 79.30<br><sub>15.60</sub> | 78.60<br><sub>15.49</sub> | 88.60<br><sub>14.15</sub> | <strong>92.14</strong><br><sub><strong>11.60</strong></sub> |
-| DeepSeek-V4-Flash | 72.86<br><sub>16.91</sub> | 78.57<br><sub>16.89</sub> | 77.86<br><sub>17.09</sub> | <strong>86.43</strong><br><sub><strong>14.41</strong></sub> |
-| GPT-5.6-Luna | 72.86<br><sub><strong>17.74</strong></sub> | 55.00<br><sub>22.06</sub> | 60.71<br><sub>21.86</sub> | <strong>75.71</strong><br><sub>17.79</sub> |
-
-#### ScienceWorld U211
-
-Each cell shows **mean best official score `R`** on the first line and **reported `Steps`** below. Bold marks the best observed value in each model row.
-
-| Model | Vanilla | Vector | GoS | **CaSKG** |
-|:---|---:|---:|---:|---:|
-| MiniMax-M2.7 | 45.90<br><sub>21.73</sub> | 43.21<br><sub>21.45</sub> | 55.85<br><sub>18.91</sub> | <strong>68.33</strong><br><sub><strong>17.45</strong></sub> |
-| GLM-5.2 | 75.50<br><sub>17.03</sub> | 77.07<br><sub>16.65</sub> | 80.33<br><sub>15.75</sub> | <strong>85.11</strong><br><sub><strong>14.52</strong></sub> |
-| Kimi-K2.6 | 72.23<br><sub>18.91</sub> | 72.58<br><sub>17.55</sub> | 76.82<br><sub>16.15</sub> | <strong>83.88</strong><br><sub><strong>15.43</strong></sub> |
-| Qwen3.5-397B-A17B | 63.72<br><sub>18.34</sub> | 62.60<br><sub>18.51</sub> | 63.18<br><sub>17.08</sub> | <strong>74.97</strong><br><sub><strong>15.56</strong></sub> |
-| DeepSeek-V4-Flash | 64.84<br><sub>18.49</sub> | 68.65<br><sub>18.39</sub> | 73.45<br><sub>16.20</sub> | <strong>83.40</strong><br><sub><strong>15.61</strong></sub> |
-| GPT-5.6-Luna | 84.09<br><sub>14.99</sub> | 84.09<br><sub>14.40</sub> | 86.08<br><sub>14.22</sub> | <strong>87.33</strong><br><sub><strong>13.18</strong></sub> |
-
-Across the six-model macro-average, CaSKG improves `R` from **80.01% to 86.79%** on ALFWorld and from **72.62 to 80.50** on ScienceWorld relative to GoS. Reported mean Steps fall from **15.96 to 14.05** and from **16.39 to 15.29**, respectively. The only global step-count exception is GPT-5.6-Luna on ALFWorld: Vanilla is 0.05 steps shorter, but its success rate is 2.85 percentage points lower.
-
-### Performance across Skill-Library Sizes
+<a id="library-size"></a>
+## 📚 Performance across Skill-Library Sizes
 
 Archived ALFWorld ID-140 aggregates compare CaSKG with GoS at nominal library sizes of 200, 500, 1,000, and 2,000 skills for MiniMax-M2.7 and Qwen3.5-397B-A17B.
 
-> **Interpretation boundary.** This is a descriptive system-level comparison, not a controlled size ablation, complexity experiment, or compute benchmark. The records do not establish that the four libraries are nested or differ only in size. MiniMax assesses 500 candidate relations at 200 to 1,000 skills and 2,000 relations at 2,000 skills; the Qwen GoS values are archived aggregates without matching episode directories.
-
 <p align="center">
-  <a href="assets/fig_library_size_sensitivity.svg">
-    <picture>
-      <source srcset="assets/fig_library_size_sensitivity.svg" type="image/svg+xml">
-      <img src="assets/fig_library_size_sensitivity.png"
-           alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
-           width="720">
-    </picture>
-  </a>
+  <img src="fig_library_size_sensitivity.png"
+       alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
+       width="760">
 </p>
 
 <p align="center">
-  <em><strong>Figure 2.</strong> Archived CaSKG and GoS results at four nominal skill-library sizes. Interpret "environment steps" as the ALFWorld agent-turn counter defined above.</em>
-  <br>
-  <sub><a href="assets/fig_library_size_sensitivity.svg">SVG</a> &middot; <a href="assets/fig_library_size_sensitivity.png">Full-size PNG</a> &middot; <a href="assets/fig_library_size_sensitivity.pdf">Original PDF</a></sub>
+  <em><strong>Figure 2.</strong> CaSKG and GoS performance at four nominal skill-library sizes.</em>
 </p>
 
-Across all eight archived backbone-size comparisons, CaSKG records higher success and lower reported Steps than GoS. The observed success difference ranges from **+3.54 to +22.86 percentage points**, while the reported Steps difference ranges from **1.25 to 4.46**. The best observed CaSKG success occurs at 1,000 skills for MiniMax and 500 for Qwen; neither CaSKG curve is monotonic. The evidence covers two backbones and one benchmark, without repeated-run variance or significance estimates.
+Across all eight archived backbone-size comparisons, CaSKG records higher success and fewer reported Steps than GoS. The success difference ranges from **+3.54 to +22.86 percentage points**, while the Steps difference ranges from **1.25 to 4.46**. The best observed CaSKG success occurs at 1,000 skills for MiniMax and 500 for Qwen; neither CaSKG curve is monotonic.
 
 <details>
-<summary><strong>Exact values and comparison scope</strong></summary>
+<summary><strong>Exact library-size results</strong></summary>
 
-| Model | Skills | CaSKG R (%) | GoS R (%) | Delta R (pp) | CaSKG Steps | GoS Steps |
-|---|---:|---:|---:|---:|---:|---:|
-| MiniMax-M2.7 | 200 | **57.14** | 50.00 | +7.14 | **20.73** | 22.21 |
-|  | 500 | **67.86** | 45.00 | +22.86 | **19.95** | 23.07 |
-|  | 1,000 | **73.57** | 63.60 | +9.97 | **18.44** | 19.69 |
-|  | 2,000 | **70.00** | 54.29 | +15.71 | **18.71** | 21.32 |
-| Qwen3.5-397B-A17B | 200 | **85.00** | 76.43 | +8.57 | **14.50** | 16.25 |
-|  | 500 | **94.29** | 72.86 | +21.43 | **12.48** | 16.94 |
-|  | 1,000 | **92.14** | 88.60 | +3.54 | **11.60** | 14.15 |
-|  | 2,000 | **91.43** | 77.86 | +13.57 | **12.31** | 16.47 |
+| Model | Skills | CaSKG R (%) | GoS R (%) | CaSKG Steps | GoS Steps |
+|:---|---:|---:|---:|---:|---:|
+| MiniMax-M2.7 | 200 | **57.14** | 50.00 | **20.73** | 22.21 |
+|  | 500 | **67.86** | 45.00 | **19.95** | 23.07 |
+|  | 1,000 | **73.57** | 63.60 | **18.44** | 19.69 |
+|  | 2,000 | **70.00** | 54.29 | **18.71** | 21.32 |
+| Qwen3.5-397B-A17B | 200 | **85.00** | 76.43 | **14.50** | 16.25 |
+|  | 500 | **94.29** | 72.86 | **12.48** | 16.94 |
+|  | 1,000 | **92.14** | 88.60 | **11.60** | 14.15 |
+|  | 2,000 | **91.43** | 77.86 | **12.31** | 16.47 |
 
 </details>
 
-### Graph-Construction Component Analysis
+> **Interpretation boundary.** This is a descriptive system-level comparison, not a controlled size-only ablation or compute benchmark. The archived records do not establish that all four libraries are nested or differ only in size.
 
-This comparison uses MiniMax-M2.7, Skill1000, ALFWorld ID-140, the same 140-task cohort, and a 30-step limit. `C`, `F`, and E<sub>pub</sub> denote candidate, counterfactually assessed, and published relations.
+<a id="component-analysis"></a>
+## 🧪 Graph-Construction Component Analysis
 
-| Variant | C | F | E<sub>pub</sub> | R (%) &uarr; | Steps &darr; |
+The component comparison uses MiniMax-M2.7, Skill1000, ALFWorld ID-140, the same 140-task cohort, and a 30-step limit. `C`, `F`, and E<sub>pub</sub> denote candidate, counterfactually assessed, and published relations.
+
+| Variant | C | F | E<sub>pub</sub> | R (%) ↑ | Steps ↓ |
 |:---|---:|---:|---:|---:|---:|
 | **Full CaSKG** | 9,937 | 500 | 3,292 | **73.57** | **18.44** |
 | Semantic-only candidates | 3,982 | 500 | 2,698 | 67.14 | 19.21 |
 | Without candidate-stage LLM judge | 9,753 | 500 | 3,188 | 71.43 | 18.79 |
 | Publish all candidates | 9,937 | 0 | 9,937 | 71.43 | 18.74 |
 
-- **Broad candidate induction:** Full CaSKG improves over semantic-only candidates by **6.43 percentage points** and reduces reported Steps by **0.77**.
-- **Judge-assisted candidate scoring:** Full CaSKG improves over the no-judge variant by **2.14 percentage points** and **0.35 Steps** under this configuration.
-- **Counterfactual assessment and state-gated publication:** Starting from the same 9,937 candidates, assessing a frontier and publishing 3,292 relations improves over publishing every candidate by **2.14 percentage points** and **0.30 Steps**.
+- **Broad candidate induction** contributes 6.43 percentage points over semantic-only candidates.
+- **Judge-assisted candidate scoring** contributes 2.14 percentage points under this configuration.
+- **Counterfactual assessment and state-gated publication** outperform publishing every candidate by 2.14 percentage points.
 
-> **Ablation scope.** `F` counts counterfactually assessed relations, not probe calls. Published relations are not all validated relations because the runtime graph can include bounded unassessed scaffold edges. The no-judge variant removes only the candidate-stage judge and still uses later LLM counterfactual probes. Each row is a single cohort aggregate; no repeated-run uncertainty or significance test is available.
+> `F` counts assessed relations, not individual probe calls. The no-judge variant removes only the candidate-stage judge and still uses later LLM counterfactual probes. These are single-cohort aggregates without repeated-run uncertainty estimates.
 
-<details>
-<summary><strong>Task-type and trajectory analysis</strong></summary>
-
-On ScienceWorld, CaSKG improves over GoS on **21 of 24 task types**, ties on one, and trails on two. The largest gains occur in tertiary- and secondary-color mixing, plant growing, unknown conductivity, and energy classification, where success depends on preserving multi-step operational structure.
-
-| Benchmark and model | Task | CaSKG | Baseline behavior |
-|---|---|---|---|
-| ScienceWorld, MiniMax-M2.7 | Conductivity testing | Score 100 in 24 steps after retrieving circuit setup, testing, classification, and placement guidance | GoS: 55/30; Vanilla: 55/29; Vector: 5/30 |
-| ALFWorld, GLM-5.2 | Cool an apple, then place it on a countertop | Completed in 27 steps with search, state-change tracking, and final-placement guidance | Vanilla, Vector, and GoS each scored 0 at the 30-step limit |
-
-These examples illustrate failure modes behind the aggregate table; they are not independent causal evidence.
-
-</details>
-
-## Installation
+<a id="installation"></a>
+## 📦 Installation
 
 ### Requirements
 
-- Python 3.10 through 3.12. The lock file and `.python-version` use Python 3.12.13.
+- Python 3.10 through 3.12; the lock file and `.python-version` use Python 3.12.13.
 - [`uv`](https://docs.astral.sh/uv/) for the locked environment.
 - OpenAI-compatible chat and embedding services for graph construction and retrieval.
+
+Docker is **not required** for CaSKG, ALFWorld, or ScienceWorld in this repository.
 
 ### Setup
 
@@ -242,29 +216,31 @@ uv sync --frozen
 cp .env.example .env
 ```
 
-On PowerShell, use `Copy-Item .env.example .env` for the last command. The remaining multiline examples use Bash/WSL syntax; in PowerShell, replace each trailing `\` with a PowerShell backtick, change `$NAME` references to `$env:NAME`, and set environment variables as `$env:NAME = "value"`. Add the credentials and endpoints needed by your run, and never commit `.env`.
+On PowerShell, use:
 
-<details>
-<summary><strong>Core configuration</strong></summary>
+```powershell
+uv python install 3.12.13
+uv sync --frozen
+Copy-Item .env.example .env
+```
+
+Configure the following values in `.env` and never commit credentials:
 
 | Variable | Purpose |
-|---|---|
+|:---|:---|
 | `OPENAI_API_KEY`, `OPENAI_BASE_URL` | OpenAI-compatible services used during graph construction and retrieval |
-| `API_KEY`, `BASE_URL` | Chat credentials used by the basic ALFWorld runner |
+| `API_KEY`, `BASE_URL` | Chat service used by the basic ALFWorld runner |
 | `CASKG_LLM_MODEL` | Model used for candidate scoring and counterfactual probes |
 | `CASKG_EMBEDDING_MODEL` | Embedding model used for indexing and retrieval |
 | `CASKG_EMBEDDING_DIM` | Embedding dimension; it must match the model and workspace |
 | `CASKG_WORKING_DIR` | Default CaSKG workspace |
 
-The supplied `.env.example` selects `openai/Qwen3-Embedding-8B` with 4,096-dimensional embeddings and `openai/MiniMax-M2.7` for graph-construction calls. Keep the embedding model and dimension unchanged between workspace construction and retrieval. Benchmark-specific variables are described under [Evaluation](#evaluation).
+<a id="quick-start"></a>
+## 🚀 Quick Start
 
-</details>
+> **External assets required.** Skill1000 and the frozen paper workspace are not currently bundled with this repository. The workflow below builds a new workspace from a separately obtained skill corpus; exact paper-result reproduction additionally requires the archived workspace, model routes, baselines, and raw runs.
 
-## Quick Start
-
-> **External assets required.** Skill1000 and the frozen paper workspace do not currently have a public download URL and are not stored in this repository. The steps below build and use a new CaSKG workspace from a separately obtained skill corpus; exact paper-result reproduction additionally requires the archived workspace, model routes, baseline implementations, and raw runs.
-
-### Step 1: Bring Your Own Skill Library
+### Step 1: Prepare a Skill Library
 
 ```text
 data/
@@ -275,10 +251,7 @@ data/
     `-- skills_1000/
 ```
 
-Core indexing recursively discovers files named `SKILL.md`. For the paper workflow below, place one skill in each immediate child directory, include nonempty `name` and `description` fields in its YAML frontmatter, and keep the directory basename identical to `name`. This also satisfies the flatter metadata loaders used by validation and ALFWorld.
-
-<details>
-<summary><strong>Minimal SKILL.md example</strong></summary>
+Each `SKILL.md` needs nonempty `name` and `description` fields in its YAML frontmatter. For the paper workflow, keep the directory basename identical to `name`.
 
 ```markdown
 ---
@@ -292,8 +265,6 @@ Inspect the headers, compare the requested rows or columns, and report the
 largest differences together with the units.
 ```
 
-</details>
-
 ### Step 2: Build the Candidate Graph
 
 ```bash
@@ -302,11 +273,9 @@ uv run caskg-index data/skillsets/skills_1000 \
   --clear
 ```
 
-> `--clear` removes the target workspace before rebuilding it; omit the flag when that workspace must be preserved. Indexing sends skill text to the configured embedding and chat services.
+This indexes skill nodes, computes embeddings, induces directed candidate relations, and publishes an initial runtime graph. `--clear` removes the target workspace before rebuilding it; omit the flag when that workspace must be preserved.
 
-This indexes skill nodes, computes embeddings, induces directed candidate relations, and publishes an initial runtime graph.
-
-### Step 3: Calibrate and Publish Edges
+### Step 3: Calibrate and Publish Relations
 
 ```bash
 uv run python experiments/run_validation.py \
@@ -321,7 +290,7 @@ uv run python experiments/run_validation.py \
   --seed 42
 ```
 
-This updates the calibrated edge states, appends the validation log, and republishes the weighted runtime graph. The command can issue many paid remote requests and uses concurrency 16, so adjust the budget and concurrency to the provider's limits. `--resume` skips successfully completed probes recorded in the matching log, but recovery is not strictly transactional or idempotent; keep the log and state from the same checkpoint and back up the workspace first. For a local pipeline check, copy the workspace, replace `--max-edges 500` with a small value, and add `--dry-run`. Dry-run outcomes are simulated, but the command still writes the validation log, state, summary, and published graph; never run it against a workspace that must remain unchanged.
+Validation can issue many paid remote requests. Adjust `--max-edges` and `--batch-concurrency` to the provider's limits, and preserve the validation log together with its workspace checkpoint.
 
 ### Step 4: Retrieve and Inspect
 
@@ -335,62 +304,55 @@ uv run caskg status \
   --workspace data/caskg_workspace/skills_1000
 ```
 
-The retrieval response includes the ranked skills and hydrated context that can be passed to an agent.
+The retrieval response contains ranked skills and hydrated context that can be passed directly to an agent.
 
-## Agent Integration
+<a id="agent-integration"></a>
+## 🔌 Agent Integration
 
-The command line is the canonical local interface. An MCP server is available for agents that support tool-based context retrieval, but it is optional and is not used by the benchmark runners.
+The command line is the canonical local interface. An MCP server is available for agents that support tool-based retrieval, but it is optional and is not used by the benchmark runners.
 
 ### Command Line
 
 | Workflow | Entry point |
-|---|---|
+|:---|:---|
 | Build a candidate graph | `caskg-index <skill-directory>` |
 | Calibrate relation reliability | `python experiments/run_validation.py` |
 | Retrieve an agent-ready bundle | `caskg retrieve <task> --json` |
 | Inspect a workspace | `caskg status` |
 
-Run `uv run caskg --help`, `uv run caskg-index --help`, or `uv run python experiments/run_validation.py --help` for the complete option lists.
+Run `uv run caskg --help`, `uv run caskg-index --help`, or `uv run python experiments/run_validation.py --help` for complete option lists.
 
 ### MCP Server (Optional)
 
-Set `CASKG_WORKING_DIR` to a prepared workspace, then start the stdio server:
+Set `CASKG_WORKING_DIR` to a prepared workspace and start the stdio server:
 
 ```bash
 uv run caskg-server
 ```
 
-It exposes four tools:
-
 | Tool | Purpose |
-|---|---|
+|:---|:---|
 | `search_skills` | Return a concise summary of relevant skills |
 | `retrieve_skill_bundle` | Return ranked skills and hydrated context |
 | `hydrate_skills` | Load full content for known skill names |
 | `get_graph_info` | Report graph size and retrieval defaults |
 
-This repository does not ship client auto-discovery configuration. Register `uv run caskg-server` manually in the MCP client and run it from the repository root.
+Register `uv run caskg-server` manually in the MCP client and run it from the repository root. No Docker or client-specific container wrapper is needed.
 
-## Evaluation
+<a id="evaluation"></a>
+## 📋 Evaluation
 
-Both benchmarks run as local Python environments and call the CaSKG retrieval adapter directly. The commands below run the CaSKG condition for one configured model and workspace; they are not a turnkey reproduction of every row in the six-model result table.
+Both benchmarks run as local environments and call the CaSKG retrieval adapter directly. The examples below run one CaSKG condition; they are not a turnkey reproduction of every row in the six-model table.
 
 ### ALFWorld ID-140
 
-For the pinned paper environment, use Linux or WSL; the ALFWorld/TextWorld/Jericho dependency chain is not reliably installable on native Windows with Python 3.12 and may require a native compiler toolchain. Ensure `API_KEY` and `BASE_URL` are set in `.env` for the chat service; the runner falls back to `OPENAI_API_KEY` and `OPENAI_BASE_URL`. Then install the optional dependency, download the environment data, and expose its root:
+Use Linux or WSL for the pinned paper environment; the ALFWorld/TextWorld/Jericho dependency chain is not reliably installable on native Windows with Python 3.12.
 
 ```bash
 uv sync --frozen --extra alfworld
 uv run alfworld-download --data-dir data/alfworld
 export ALFWORLD_DATA="$PWD/data/alfworld"
-```
 
-PowerShell: `$env:ALFWORLD_DATA = (Resolve-Path data/alfworld).Path`.
-
-<details>
-<summary><strong>Run the intended 140-episode CaSKG condition</strong></summary>
-
-```bash
 uv run python evaluation/alfworld_run.py \
   --model MiniMax-M2.7 \
   --split dev \
@@ -403,42 +365,18 @@ uv run python evaluation/alfworld_run.py \
   --skills_dir data/skillsets/skills_1000
 ```
 
-When neither `--max_games` nor `--task_indices` is supplied, `--split dev` selects the 140 `eval_in_distribution` games. Episode records are written to:
+When neither `--max_games` nor `--task_indices` is supplied, `--split dev` selects the intended 140 in-distribution games. Use a unique `--exp_name` and an empty output directory for every configuration.
 
-```text
-results/alfworld/MiniMax-M2.7/dev_skills_1000_mode_caskg/idx_<episode>.json
-```
+### ScienceWorld U211
 
-The runner reuses any `idx_*.json` already present in that directory without checking its configuration or even confirming that the JSON is valid before skipping its index. Start each configuration with an empty output directory and a unique `--exp_name`. Afterward, verify that indices 0 through 139 are present, every JSON file parses, and each record contains the expected `name`, `reward`, and `steps` fields; a failed episode can otherwise leave the run incomplete without an aggregate summary.
-
-</details>
-
-### ScienceWorld U211 (Unseen-211)
-
-Install the pinned Python packages and confirm that Java is available:
+ScienceWorld requires Java and the pinned Python packages:
 
 ```bash
 uv pip install "scienceworld==1.2.3" "py4j==0.10.9.9"
 java -version
 ```
 
-Before evaluation, point the CaSKG entry in `configs/retrievers_v1.json` to the intended frozen workspace. Every model episode, including a partial development run, requires a controlled OpenAI-compatible router that returns `X-Router-Policy: strict`. A complete 211-episode run additionally requires `--expected-router-provider`, and every response must return the matching `X-Router-Provider`; partial runs enforce that header when the option is set. A generic endpoint without the strict-policy response header can run `--validate-only` or retrieval preflight, but it cannot run model episodes. The runner reads credentials from the process environment, so export them in the same shell; copying values into `.env` alone is insufficient.
-
-```bash
-export ROUTER_MASTER_KEY="<key>"
-export SCIENCEWORLD_ROUTER_BASE_URL="<controlled-router-url>"
-export CASKG_EXPECTED_CHAT_PROVIDER="<provider-id>"
-```
-
-PowerShell:
-
-```powershell
-$env:ROUTER_MASTER_KEY = "<key>"
-$env:SCIENCEWORLD_ROUTER_BASE_URL = "<controlled-router-url>"
-$env:CASKG_EXPECTED_CHAT_PROVIDER = "<provider-id>"
-```
-
-Validate the frozen 211-episode protocol without model calls, then run a one-episode retrieval preflight:
+Validate the frozen 211-episode protocol, then run a retrieval preflight:
 
 ```bash
 uv run python -m evaluation.scienceworld_eto211_run --validate-only
@@ -449,8 +387,7 @@ uv run python -m evaluation.scienceworld_eto211_run \
   --retrieval-preflight
 ```
 
-<details>
-<summary><strong>Run the complete 211-episode CaSKG condition</strong></summary>
+A complete model run requires the controlled OpenAI-compatible router and expected provider headers used by the evaluation protocol:
 
 ```bash
 uv run python -m evaluation.scienceworld_eto211_run \
@@ -464,101 +401,51 @@ uv run python -m evaluation.scienceworld_eto211_run \
   --output-dir results/scienceworld
 ```
 
-Compatible records are resumable. The aggregate summary is written to:
+<a id="development"></a>
+## 🛠️ Development
 
-```text
-results/scienceworld/eto_skillnet_unseen211/caskg/MiniMax-M2.7/summary.json
-```
-
-</details>
-
-## Development and Reference
-
-<details>
-<summary><strong>Testing</strong></summary>
-
-Core tests do not require a live model endpoint or graph workspace:
+Core checks do not require a live model endpoint or graph workspace:
 
 ```bash
 uv run pytest -m "not integration" tests
 uv run python -m compileall -q caskg experiments evaluation tests
 ```
 
-After installing the ScienceWorld dependencies, run:
-
-```bash
-uv run pytest -m "not integration" evaluation/tests
-```
-
-Integration tests require configured model endpoints and, where applicable, a skill corpus and matching graph workspace.
-
-</details>
-
 <details>
 <summary><strong>Repository layout</strong></summary>
 
 ```text
 .
-|-- assets/                 Method figures and affiliation marks
 |-- caskg/
-|   |-- causal/             Candidate induction, probes, edge states, publication
+|   |-- causal/             Candidate induction, probes, states, publication
 |   |-- core/               Skill parsing, graph storage, online retrieval
 |   |-- interfaces/         CLI and MCP entry points
 |   `-- utils/              Environment-based configuration
 |-- experiments/            Counterfactual edge-calibration runner
-|-- evaluation/             ALFWorld and ScienceWorld evaluation runners
+|-- evaluation/             ALFWorld and ScienceWorld runners
 |-- configs/                Frozen evaluation and retriever configuration
 |-- manifests/              Frozen episode identities and checksums
 |-- prompts/                Frozen evaluation prompts
-|-- tests/                  Core unit and integration tests
-|-- .env.example            Credential-free configuration template
-|-- pyproject.toml          Package metadata and dependencies
-`-- uv.lock                 Locked dependency graph
+|-- tests/                  Core and integration tests
+|-- CaSKG_method_overview_final.png
+|-- fig_library_size_sensitivity.png
+|-- .env.example
+|-- pyproject.toml
+`-- uv.lock
 ```
 
 </details>
 
-<details>
-<summary><strong>Reproducibility notes</strong></summary>
+<a id="authors"></a>
+## 👥 Authors and Affiliations
 
-- This repository contains the CaSKG implementation and CaSKG evaluation runners. Skill1000, the frozen paper workspace, raw model outputs, and comparison-system implementations are not bundled.
-- Remote graph-construction and agent calls can be stochastic. Preserve the model route, embedding configuration, workspace, protocol files, and hashes with each run.
-- The supplied ScienceWorld protocol does not enumerate the complete six-model manuscript table, although the runner accepts an explicit model name.
-- The result tables and scaling figure above transcribe archived manuscript artifacts; this README does not add uncertainty estimates or statistical-significance claims.
+| Author | Affiliation(s) | Email | Note |
+|:---|:---|:---|:---|
+| Zhiyuan Li | Jilin University; Ant Group | [zhiyuanl24@mails.jlu.edu.cn](mailto:zhiyuanl24@mails.jlu.edu.cn) | Equal contribution; work done while an intern at Ant Group |
+| Linyuan Gao | Jilin University | [lygao25@mails.jlu.edu.cn](mailto:lygao25@mails.jlu.edu.cn) | Equal contribution |
+| Xuechun Ding | Ant Group | [dingxuechun.dxc@antgroup.com](mailto:dingxuechun.dxc@antgroup.com) |  |
+| Hongwei Chen | Ant Group | [wei.chenhw@antgroup.com](mailto:wei.chenhw@antgroup.com) | Co-corresponding author |
+| Yuan Wu | Jilin University | [yuanwu@jlu.edu.cn](mailto:yuanwu@jlu.edu.cn) | Co-corresponding author |
+| Yi Chang | Jilin University | [yichang@jlu.edu.cn](mailto:yichang@jlu.edu.cn) |  |
 
-</details>
-
-<details>
-<summary><strong>Troubleshooting</strong></summary>
-
-| Problem | Resolution |
-|---|---|
-| `No usable Java runtime was found` | Install a JDK, set `JAVA_HOME`, and confirm `java -version` in the same shell. |
-| `Embedding dimension mismatch` | Use the embedding model and dimension that built the workspace. |
-| `Workspace does not exist` | Resolve paths from the repository root and pair the workspace with its original skill directory. |
-| `Router provider mismatch` or `Router policy mismatch` | Use the controlled router and ensure every response returns the expected `X-Router-Provider` and `X-Router-Policy: strict` headers. |
-| `ALFWORLD_DATA` paths are unresolved | Confirm that the root contains `json_2.1.1/valid_seen` and `logic/alfred.pddl`. |
-
-</details>
-
-<details>
-<summary><strong>Authors, affiliations, and paper metadata</strong></summary>
-
-| Author | Affiliation(s) | Location | Email | Note |
-|---|---|---|---|---|
-| Zhiyuan Li | School of Artificial Intelligence, Jilin University; Ant Group | Changchun, China | [zhiyuanl24@mails.jlu.edu.cn](mailto:zhiyuanl24@mails.jlu.edu.cn) | Equal contribution; work done while an intern at Ant Group |
-| Linyuan Gao | School of Artificial Intelligence, Jilin University | Changchun, China | [lygao25@mails.jlu.edu.cn](mailto:lygao25@mails.jlu.edu.cn) | Equal contribution |
-| Xuechun Ding | Ant Group | Hangzhou, China | [dingxuechun.dxc@antgroup.com](mailto:dingxuechun.dxc@antgroup.com) |  |
-| Hongwei Chen | Ant Group | Hangzhou, China | [wei.chenhw@antgroup.com](mailto:wei.chenhw@antgroup.com) | Co-corresponding author |
-| Yuan Wu | School of Artificial Intelligence, Jilin University | Changchun, China | [yuanwu@jlu.edu.cn](mailto:yuanwu@jlu.edu.cn) | Co-corresponding author |
-| Yi Chang | School of Artificial Intelligence, Jilin University | Changchun, China | [yichang@jlu.edu.cn](mailto:yichang@jlu.edu.cn) |  |
-
-**Title:** CaSKG: Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval
-
-**Short author list:** Z. Li, et al.
-
-**CCS concepts:** Computing methodologies: Planning and scheduling; Information systems: Retrieval models and ranking; Computing methodologies: Natural language processing.
-
-**Keywords:** LLM agents, skill retrieval, graph retrieval, causal validation, counterfactual reasoning.
-
-</details>
+The affiliation marks at the top identify the authors' institutions and do not imply endorsement of this repository. Their official sources are recorded in [`LOGO_SOURCES.md`](LOGO_SOURCES.md).
