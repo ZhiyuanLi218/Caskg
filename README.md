@@ -1,409 +1,267 @@
 <h1 align="center">CaSKG</h1>
 
 <p align="center">
-  <strong>Counterfactual-Causal Skill Graphs for LLM Agent Skill Libraries</strong>
+  <strong>Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval</strong>
 </p>
 
 <p align="center">
-  Build a skill graph offline, validate candidate dependencies with counterfactual
-  probes, and retrieve a small prerequisite-aware skill bundle at runtime.
+  <a href="mailto:zhiyuanl24@mails.jlu.edu.cn"><strong>Zhiyuan Li</strong></a><sup>1,2,*</sup> &middot;
+  <a href="mailto:lygao25@mails.jlu.edu.cn"><strong>Linyuan Gao</strong></a><sup>1,*</sup> &middot;
+  <a href="mailto:dingxuechun.dxc@antgroup.com"><strong>Xuechun Ding</strong></a><sup>2</sup> &middot;
+  <a href="mailto:wei.chenhw@antgroup.com"><strong>Hongwei Chen</strong></a><sup>2,&dagger;</sup> &middot;
+  <a href="mailto:yuanwu@jlu.edu.cn"><strong>Yuan Wu</strong></a><sup>1,&dagger;</sup> &middot;
+  <a href="mailto:yichang@jlu.edu.cn"><strong>Yi Chang</strong></a><sup>1</sup>
 </p>
 
 <p align="center">
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10--3.12-3776ab?logo=python&logoColor=white" alt="Python 3.10-3.12"></a>
-  <a href="https://docs.astral.sh/uv/"><img src="https://img.shields.io/badge/managed%20with-uv-6e9f18" alt="Managed with uv"></a>
-  <img src="https://img.shields.io/badge/status-research%20code-orange" alt="Research code">
+  <sup>1</sup> School of Artificial Intelligence, Jilin University &nbsp;&nbsp;
+  <sup>2</sup> Ant Group
+</p>
+
+<p align="center">
+  <sup>*</sup> Equal contribution &nbsp;&nbsp; <sup>&dagger;</sup> Co-corresponding authors
+  <br>
+  <sub>Work done while Zhiyuan Li was an intern at Ant Group.</sub>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10--3.12-3776ab?logo=python&logoColor=white" alt="Python 3.10-3.12">
+  <img src="https://img.shields.io/badge/Skill%20Library-Skill1000-555555" alt="Skill1000">
+  <img src="https://img.shields.io/badge/Benchmarks-ALFWorld%20%7C%20ScienceWorld-0b7285" alt="ALFWorld and ScienceWorld">
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> &middot;
+  <a href="#results">Results</a> &middot;
+  <a href="#installation">Installation</a> &middot;
+  <a href="#quick-start">Quick Start</a> &middot;
+  <a href="#agent-integration">Agent Integration</a> &middot;
+  <a href="#evaluation">Evaluation</a>
 </p>
 
 ---
 
-CaSKG is a research implementation for turning a directory of `SKILL.md`
-documents into a searchable, causal-aware graph. It separates inexpensive
-association signals from intervention evidence, then uses the resulting graph
-to assemble bounded context for an LLM agent.
-
-This repository contains the core package, command-line and MCP interfaces,
-counterfactual validation, benchmark runners, frozen protocol metadata, and
-tests. Large skill corpora, API credentials, benchmark installations, raw
-model outputs, and prebuilt workspaces are external assets and are not part of
-the code checkout.
-
 ## Overview
 
-A flat skill library makes it difficult to answer questions such as "what must
-run before this skill?" or "which other skill repairs a failed attempt?" CaSKG
-represents skills as nodes and directed relations as edges. Relations are
-treated as hypotheses until counterfactual evidence supports them.
+Large skill libraries broaden what an LLM agent can do, but they also make retrieval harder. Full-library prompting introduces irrelevant procedures, independent vector retrieval can miss workflow dependencies, and graph expansion is useful only when the relations carrying relevance are reliable.
 
-The online retriever combines semantic and lexical seeds with graph structure,
-traverses prerequisite relations backwards, and returns only a character-bounded
-bundle. The agent therefore receives relevant skill content without loading the
-entire library.
+**CaSKG** builds a counterfactual-causal skill graph offline, then retrieves a compact, executable skill bundle for each task. It separates broad candidate discovery from relation-reliability calibration: multiple skill-level signals propose directed relations, direction-conditioned textual counterfactual probes assess a budgeted subset, and edge states determine which relations are published and how strongly they influence retrieval. By default, a bounded set of deferred, unvalidated candidates remains in the runtime graph as low-weight scaffold edges.
 
-## How It Works
+<p align="center">
+  <img src="assets/CaSKG_method_overview_final.png"
+       alt="CaSKG pipeline with candidate graph induction, counterfactual edge probing, edge publication, and task-conditioned retrieval"
+       width="900">
+</p>
 
-~~~text
-SKILL.md library
-      |
-      v
-Phase 1: parse, embed, and induce candidate edges
-         semantic | lexical | I/O | co-occurrence | repair | LLM judge
-      |
-      v
-Phase 2: counterfactual validation
-         removal | substitution | reordering
-         Bayesian edge posterior and status update
-      |
-      v
-Frozen runtime graph
-      |
-      v
-Phase 3: online retrieval
-         semantic + lexical seeds -> backward graph propagation
-         -> bounded, agent-ready skill bundle
-~~~
+<p align="center">
+  <em>CaSKG constructs and calibrates the graph offline, then freezes it for task-time retrieval.</em>
+  <br>
+  <a href="assets/CaSKG_method_overview_final.pdf">High-resolution figure (PDF)</a>
+</p>
 
-1. **Candidate induction.** Skill metadata and content are parsed, embedded,
-   and scored with six signals: semantic similarity, lexical overlap, input /
-   output compatibility, execution co-occurrence, repair traces, and an
-   optional LLM edge judge.
-2. **Causal validation.** The validation runner tests selected edges by removing
-   a skill, substituting an alternative, or reordering a proposed dependency.
-   Outcomes update a Beta-Binomial posterior and classify edges as confirmed,
-   rejected, or deferred.
-3. **Causal retrieval.** At task time, CaSKG seeds retrieval from the query,
-   applies causal and prerequisite-aware scoring (including backward PPR), and
-   hydrates a bounded context payload for the agent.
+**Pipeline.**
 
-## Repository Layout
+1. **Candidate graph induction:** construct a high-recall directed graph from lexical, semantic, input/output, and structural evidence.
+2. **Counterfactual edge probing:** apply direction-conditioned removal, substitution, and reordering probes to a budgeted edge frontier, then aggregate the evidence with Beta smoothing.
+3. **State-gated publication:** retain confirmed relations, attenuate uncertain ones, reject unsupported ones, and, by default, keep a bounded low-weight scaffold of deferred candidates.
+4. **Task-conditioned retrieval:** seed from lexical and semantic matches, diffuse relevance over the frozen graph with personalized PageRank, and return a bounded skill bundle.
 
-~~~text
-.
-|-- caskg/
-|   |-- causal/                   candidate induction, interventions, graph maintenance
-|   |-- core/                     parsing, storage, embeddings, retrieval
-|   |-- interfaces/               CLI and MCP entry points
-|   +-- utils/                    environment-based configuration
-|-- experiments/
-|   +-- run_validation.py         Phase 2 counterfactual validation
-|-- evaluation/
-|   |-- alfworld_run.py           ALFWorld environment loop
-|   |-- scienceworld_eto211_run.py ScienceWorld Unseen-211 evaluator
-|   |-- retrievers/               read-only retrieval worker boundary
-|   |-- skills_ref/               evaluator-facing skill parser
-|   +-- tests/                    evaluator and protocol tests
-|-- ablation_experiments/         P0 and A1-A4 controlled interventions
-|-- configs/                      benchmark protocols and worker settings
-|-- manifests/                    episode selections and checksums
-|-- prompts/                      frozen benchmark prompts
-|-- tests/                        CaSKG unit and integration tests
-|-- .env.example                  credential-free configuration template
-|-- .python-version               tested Python version (3.12.13)
-|-- pyproject.toml                package metadata and CLI entry points
-+-- uv.lock                       locked Python dependency graph
-~~~
+The textual probes calibrate the operational reliability of proposed directed relations; they are not claims of real-world causality.
 
-Generated directories such as `data/`, `results/`,
-`ablation_experiments/cache/`, and
-`ablation_experiments/graph_views/generated/` are created locally when
-running experiments. They are not required for importing the core package.
+## Results
 
-## Requirements
+We evaluate four skill-access methods with a frozen **Skill1000** library across six LLM backbones:
 
-- Python 3.10 through 3.12. The supplied lock file was checked with Python
-  3.12.13.
-- [`uv`](https://docs.astral.sh/uv/) for the locked environment.
-- An OpenAI-compatible chat endpoint and embedding endpoint for indexing,
-  validation, and model-based evaluation.
-- ALFWorld 0.4.2 and its TextWorld data for the ALFWorld runner.
-- ScienceWorld 1.2.3, Py4J 0.10.9.9, and a working Java runtime for the
-  ScienceWorld runner.
+- **Vanilla Skills:** expose the complete skill catalog.
+- **Vector Skills:** retrieve skills independently by embedding similarity.
+- **Graph-of-Skills (GoS):** retrieve over a dependency-aware skill graph.
+- **CaSKG:** retrieve over a state-weighted graph containing calibrated relations and bounded low-weight scaffold edges.
 
-On Windows, command-line smoke tests can be run from PowerShell. Native
-Windows installation of `hnswlib` may require Microsoft C++ Build Tools, so
-WSL2 is recommended for benchmark runs and native dependency installation.
-Commands containing `export`, `$PWD`, or Bash line continuations are written
-for Bash / WSL; translate environment assignments to PowerShell syntax when
-using a native shell. All commands below assume the repository root as the
-working directory.
+The two complete interactive cohorts are **ALFWorld ID-140** (140 in-distribution household episodes) and **ScienceWorld U211** (211 selected episodes spanning 24 task types from the official test split). For ALFWorld, `R` is success rate in percent. For ScienceWorld, `R` is the arithmetic mean of each episode's best official score on the 0-to-100 scale and is not a percentage. **Steps** reproduces each runner's per-episode counter: ScienceWorld increments it on environment actions, while the current ALFWorld runner increments it once per agent turn, including retrieval or action-repair turns that may not call `env.step`. It does not measure tokens, latency, graph-construction cost, or success-conditioned efficiency. Higher `R` and fewer Steps are better.
+
+Within each benchmark, all methods use the same task cohort, base prompt, evaluator, episode limits, and environment interaction loop. The retrieval structure is frozen before evaluation and the retrieved skill context is the intended method-specific difference.
+
+### Main Results (End-to-End)
+
+| Model | Method | ALFWorld R (%) | ALFWorld Steps | ScienceWorld R | ScienceWorld Steps |
+|---|---|---:|---:|---:|---:|
+| MiniMax-M2.7 | Vanilla | 42.90 | 22.54 | 45.90 | 21.73 |
+|  | Vector | 45.70 | 22.84 | 43.21 | 21.45 |
+|  | GoS | 63.60 | 19.69 | 55.85 | 18.91 |
+|  | **CaSKG** | **73.57** | **18.44** | **68.33** | **17.45** |
+| GLM-5.2 | Vanilla | 95.00 | 11.05 | 75.50 | 17.03 |
+|  | Vector | 96.43 | 10.12 | 77.07 | 16.65 |
+|  | GoS | 95.71 | 9.91 | 80.33 | 15.75 |
+|  | **CaSKG** | **97.86** | **9.69** | **85.11** | **14.52** |
+| Kimi-K2.6 | Vanilla | 77.90 | 16.07 | 72.23 | 18.91 |
+|  | Vector | 90.00 | 13.49 | 72.58 | 17.55 |
+|  | GoS | 93.60 | 13.08 | 76.82 | 16.15 |
+|  | **CaSKG** | **95.00** | **12.34** | **83.88** | **15.43** |
+| Qwen3.5-397B-A17B | Vanilla | 79.30 | 15.60 | 63.72 | 18.34 |
+|  | Vector | 78.60 | 15.49 | 62.60 | 18.51 |
+|  | GoS | 88.60 | 14.15 | 63.18 | 17.08 |
+|  | **CaSKG** | **92.14** | **11.60** | **74.97** | **15.56** |
+| DeepSeek-V4-Flash | Vanilla | 72.86 | 16.91 | 64.84 | 18.49 |
+|  | Vector | 78.57 | 16.89 | 68.65 | 18.39 |
+|  | GoS | 77.86 | 17.09 | 73.45 | 16.20 |
+|  | **CaSKG** | **86.43** | **14.41** | **83.40** | **15.61** |
+| GPT-5.6-Luna | Vanilla | 72.86 | **17.74** | 84.09 | 14.99 |
+|  | Vector | 55.00 | 22.06 | 84.09 | 14.40 |
+|  | GoS | 60.71 | 21.86 | 86.08 | 14.22 |
+|  | **CaSKG** | **75.71** | 17.79 | **87.33** | **13.18** |
+
+CaSKG achieves the highest task score in all **12 model-benchmark combinations**. Relative to GoS, the six-model macro-average improves from **80.01% to 86.79%** on ALFWorld and from **72.62 to 80.50** on ScienceWorld, while reported mean Steps fall from **15.96 to 14.05** and from **16.39 to 15.29**, respectively.
+
+CaSKG also uses fewer steps than GoS in every setting and has the lowest step count among all methods in 11 of 12 settings. The exception is GPT-5.6-Luna on ALFWorld, where Vanilla is 0.05 steps shorter but 2.85 percentage points less successful.
+
+### Scaling with Library Size
+
+We compare CaSKG with GoS on ALFWorld ID-140 as the library grows from 200 to 2,000 skills.
+
+> **Interpretation boundary.** This is an archived descriptive system-level comparison, not a fixed-budget complexity experiment. The MiniMax runs assess 500 candidate relations at 200 to 1,000 skills and 2,000 relations at 2,000 skills; the Qwen GoS values come from archived aggregates rather than matching episode directories.
+
+<p align="center">
+  <img src="assets/fig_library_size_sensitivity.png"
+       alt="ALFWorld success rate and reported Steps for CaSKG and GoS from 200 to 2,000 skills"
+       width="720">
+</p>
+
+<p align="center">
+  <em>Archived source figure; interpret its "environment steps" axis as the ALFWorld Steps counter defined above.</em>
+  <br>
+  <a href="assets/fig_library_size_sensitivity.pdf">High-resolution figure (PDF)</a>
+</p>
+
+Across all eight backbone-library-size combinations, CaSKG has both higher success and lower reported Steps than GoS. The success-rate advantage ranges from **+3.54 to +22.86 percentage points**, while the reduction ranges from **1.25 to 4.46 steps**. The best observed library size differs by backbone, so the curves should not be read as monotonic scaling laws.
+
+<details>
+<summary><strong>Exact values and comparison scope</strong></summary>
+
+| Model | Skills | CaSKG R (%) | GoS R (%) | Delta R (pp) | CaSKG Steps | GoS Steps |
+|---|---:|---:|---:|---:|---:|---:|
+| MiniMax-M2.7 | 200 | **57.14** | 50.00 | +7.14 | **20.73** | 22.21 |
+|  | 500 | **67.86** | 45.00 | +22.86 | **19.95** | 23.07 |
+|  | 1,000 | **73.57** | 63.60 | +9.97 | **18.44** | 19.69 |
+|  | 2,000 | **70.00** | 54.29 | +15.71 | **18.71** | 21.32 |
+| Qwen3.5-397B-A17B | 200 | **85.00** | 76.43 | +8.57 | **14.50** | 16.25 |
+|  | 500 | **94.29** | 72.86 | +21.43 | **12.48** | 16.94 |
+|  | 1,000 | **92.14** | 88.60 | +3.54 | **11.60** | 14.15 |
+|  | 2,000 | **91.43** | 77.86 | +13.57 | **12.31** | 16.47 |
+
+</details>
+
+<details>
+<summary><strong>Task-type and trajectory analysis</strong></summary>
+
+On ScienceWorld, CaSKG improves over GoS on **21 of 24 task types**, ties on one, and trails on two. The largest gains occur in tertiary- and secondary-color mixing, plant growing, unknown conductivity, and energy classification, where success depends on preserving multi-step operational structure.
+
+| Benchmark and model | Task | CaSKG | Baseline behavior |
+|---|---|---|---|
+| ScienceWorld, MiniMax-M2.7 | Conductivity testing | Score 100 in 24 steps after retrieving circuit setup, testing, classification, and placement guidance | GoS: 55/30; Vanilla: 55/29; Vector: 5/30 |
+| ALFWorld, GLM-5.2 | Cool an apple, then place it on a countertop | Completed in 27 steps with search, state-change tracking, and final-placement guidance | Vanilla, Vector, and GoS each scored 0 at the 30-step limit |
+
+These examples illustrate failure modes behind the aggregate table; they are not independent causal evidence.
+
+</details>
+
+## Citation
+
+Publication metadata will be updated when the paper is publicly released. For the current manuscript, use:
+
+```bibtex
+@misc{li2026caskg,
+  title  = {CaSKG: Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval},
+  author = {Li, Zhiyuan and Gao, Linyuan and Ding, Xuechun and Chen, Hongwei and Wu, Yuan and Chang, Yi},
+  year   = {2026},
+  note   = {Manuscript}
+}
+```
 
 ## Installation
 
-Install the locked base environment:
+### Requirements
 
-~~~bash
+- Python 3.10 through 3.12. The lock file and `.python-version` use Python 3.12.13.
+- [`uv`](https://docs.astral.sh/uv/) for the locked environment.
+- OpenAI-compatible chat and embedding services for graph construction and retrieval.
+
+### Setup
+
+From the repository root:
+
+```bash
 uv python install 3.12.13
 uv sync --frozen
-~~~
-
-The project accepts any Python version in the 3.10-3.12 range. If your
-platform does not offer 3.12.13, install the latest available 3.12.x and
-select it explicitly:
-
-~~~bash
-uv python install 3.12
-uv sync --frozen --python 3.12
-~~~
-
-Install the optional ALFWorld dependency only when that benchmark is needed:
-
-~~~bash
-uv sync --frozen --extra alfworld
-~~~
-
-ScienceWorld is currently installed separately because it is not included in
-`uv.lock`:
-
-~~~bash
-uv pip install scienceworld==1.2.3 py4j==0.10.9.9
-~~~
-
-Create a local environment file and keep credentials out of version control:
-
-~~~bash
-# Bash / WSL
 cp .env.example .env
-~~~
+```
 
-~~~powershell
-# PowerShell
-Copy-Item .env.example .env
-~~~
+On PowerShell, use `Copy-Item .env.example .env` for the last command. The remaining multiline examples use Bash/WSL syntax; in PowerShell, replace each trailing `\` with a PowerShell backtick, change `$NAME` references to `$env:NAME`, and set environment variables as `$env:NAME = "value"`. Add the credentials and endpoints needed by your run, and never commit `.env`.
 
-Check the environment before making model calls:
-
-~~~bash
-uv run python --version
-uv run python -c "import scienceworld; print(scienceworld.__version__)"
-java -version
-~~~
-
-## Configuration
-
-The main variables in [`.env.example`](.env.example) are:
+<details>
+<summary><strong>Core configuration</strong></summary>
 
 | Variable | Purpose |
 |---|---|
-| `OPENAI_API_KEY` | Credential for an OpenAI-compatible chat or embedding service |
-| `OPENAI_BASE_URL` | Base URL used by the CaSKG services |
+| `OPENAI_API_KEY`, `OPENAI_BASE_URL` | OpenAI-compatible services used during graph construction and retrieval |
 | `API_KEY`, `BASE_URL` | Chat credentials used by the basic ALFWorld runner |
-| `CASKG_LLM_MODEL` | Model used for candidate induction and validation |
+| `CASKG_LLM_MODEL` | Model used for candidate scoring and counterfactual probes |
 | `CASKG_EMBEDDING_MODEL` | Embedding model used for indexing and retrieval |
-| `CASKG_EMBEDDING_DIM` | Embedding dimension; must match the workspace |
+| `CASKG_EMBEDDING_DIM` | Embedding dimension; it must match the model and workspace |
 | `CASKG_WORKING_DIR` | Default CaSKG workspace |
-| `CASKG_PREBUILT_WORKING_DIR` | Optional prebuilt workspace fallback |
-| `CASKG_ENABLE_QUERY_REWRITE` | Enables query rewriting when set to `true` |
-| `ROUTER_MASTER_KEY` | Credential for the controlled benchmark router |
-| `CASKG_ROUTER_BASE` | Router URL for the ALFWorld parity runner |
-| `SCIENCEWORLD_ROUTER_BASE_URL` | Router URL for ScienceWorld |
-| `CASKG_EXPECTED_CHAT_PROVIDER` | Provider identity required by the strict router |
-| `CASKG_ROUTER_SESSION_ID` | Session identifier for paired benchmark runs |
-| `ALFWORLD_DATA` | Root of the downloaded ALFWorld data |
-| `JAVA_HOME` | Java installation used by ScienceWorld |
 
-Keep the embedding model and dimension unchanged between indexing and
-retrieval. A workspace built with a different embedding model is not
-compatible, even when the vector dimensions happen to match.
+The supplied `.env.example` selects `openai/Qwen3-Embedding-8B` with 4,096-dimensional embeddings and `openai/MiniMax-M2.7` for graph-construction calls. Keep the embedding model and dimension unchanged between workspace construction and retrieval. Benchmark-specific variables are described under [Evaluation](#evaluation).
 
-The formal ScienceWorld runner expects the response header
-`X-Router-Policy: strict`. If `--expected-router-provider` is supplied, each
-response must also contain the matching `X-Router-Provider` header. A generic
-OpenAI-compatible endpoint can be used for development and preflight checks,
-but a missing header is recorded as an infrastructure error in a formal run.
-
-The ALFWorld script loads the local environment file on startup. The
-ScienceWorld and numbered ablation runners read the process environment
-directly, so export the required variables before launching them. In Bash or
-WSL, for example:
-
-~~~bash
-set -a
-. ./.env
-set +a
-~~~
-
-For PowerShell, set the router and credential variables with environment
-assignments before running ScienceWorld or the numbered ablations.
+</details>
 
 ## Quick Start
 
-The shortest end-to-end path is: provide a skill directory, build a candidate
-graph, inspect it, and issue a retrieval query. The skill corpus is not bundled
-with this repository; use any directory whose entries contain valid
-`SKILL.md` files.
+> **External assets required.** Skill1000 and the frozen paper workspace do not currently have a public download URL and are not stored in this repository. The steps below build and use a new CaSKG workspace from a separately obtained skill corpus; exact paper-result reproduction additionally requires the archived workspace, model routes, baseline implementations, and raw runs.
 
-Expected input shape:
+### Step 1: Bring Your Own Skill Library
 
-~~~text
-data/
-+-- skillsets/
-    +-- skills_1000/
-        |-- skill-a/
-        |   +-- SKILL.md
-        +-- skill-b/
-            +-- SKILL.md
-~~~
-
-Each `SKILL.md` should contain YAML frontmatter with at least a `name`. A
-`description` is recommended. The parser can fall back to a Description,
-Overview, Summary, or the first non-heading sentence when it is absent.
-
-Build and query the graph:
-
-~~~bash
-uv run caskg-index data/skillsets/skills_1000 \
-  --workspace data/caskg_workspace/skills_1000 \
-  --clear
-
-uv run caskg status \
-  --workspace data/caskg_workspace/skills_1000
-
-uv run caskg-query "How do I plan a tool-based task?" \
-  --workspace data/caskg_workspace/skills_1000
-~~~
-
-`--clear` removes the target workspace before indexing. Omit it to reuse an
-existing workspace. Indexing and querying require the configured embedding
-service; candidate induction may also call the configured LLM service.
-
-## CLI
-
-The package exposes these entry points through `pyproject.toml`:
-
-| Command | Use |
-|---|---|
-| `caskg-index PATH` | Parse skills, compute embeddings, and build the CaSKG candidate graph |
-| `caskg add PATH` | Add a skill file or directory incrementally |
-| `caskg status` | Show node and edge counts for a workspace |
-| `caskg-query QUERY` | Run causal-aware retrieval and print a concise result |
-| `caskg-query QUERY --json` | Emit the structured causal retrieval record |
-| `caskg-server` | Start the basic MCP server using `CASKG_WORKING_DIR` |
-
-Use `uv run <command> --help` for the complete option list. The general
-`caskg query` command is also available for the lower-level graph retriever;
-`caskg-query` is the causal-aware entry point used by the benchmark adapters.
-
-## MCP Integration
-
-For the basic MCP server, set the workspace in the environment and launch:
-
-~~~bash
-CASKG_WORKING_DIR=data/caskg_workspace/skills_1000 uv run caskg-server
-~~~
-
-PowerShell equivalent:
-
-~~~powershell
-$env:CASKG_WORKING_DIR = "data/caskg_workspace/skills_1000"
-uv run caskg-server
-~~~
-
-The richer Claude Code-compatible server accepts an explicit workspace:
-
-~~~bash
-uv run python -m caskg.interfaces.claude_code \
-  --workspace data/caskg_workspace/skills_1000
-~~~
-
-The MCP tools expose search, bundle retrieval, hydration by skill name, graph
-status, skill details, and graph-neighbor inspection. A workspace must already
-be indexed before retrieval tools can return skill content.
-
-## External Assets
-
-The following assets are deliberately separate from the code checkout:
-
-~~~text
+```text
 data/
 |-- skillsets/
-|   +-- skills_1000/
-|       +-- <skill-name>/SKILL.md
-+-- caskg_workspace/
-    |-- skills_1000/
-    +-- skills_1000_v32_scaffold_publish_gospath/
-~~~
+|   `-- skills_1000/
+|       `-- <skill-name>/SKILL.md
+`-- caskg_workspace/
+    `-- skills_1000/
+```
 
-`configs/retrievers_v1.json` expects
-`data/caskg_workspace/skills_1000` for the main ScienceWorld run. The numbered
-ablation builder expects the frozen
-`skills_1000_v32_scaffold_publish_gospath` workspace. They may be copies or
-symbolic links to the same frozen workspace.
+Core indexing recursively discovers files named `SKILL.md`. For the paper workflow below, place one skill in each immediate child directory, include nonempty `name` and `description` fields in its YAML frontmatter, and keep the directory basename identical to `name`. This also satisfies the flatter metadata loaders used by validation and ALFWorld.
 
-For exact P0/A1-A4 reproduction, the frozen workspace must contain at least:
+<details>
+<summary><strong>Minimal SKILL.md example</strong></summary>
 
-~~~text
-candidate_checkpoint.jsonl
-caskg_state.json
-chunks_kv_data.pkl
-entities_hnsw_index_4096.bin
-entities_hnsw_metadata.pkl
-graph_igraph_data.pklz
-map_e2r_blob_data.pkl
-map_r2c_blob_data.pkl
-~~~
+```markdown
+---
+name: summarize-table
+description: Summarize a structured table and report the main comparisons.
+---
 
-The reference Skill1000 workspace has 1,000 nodes and 3,292 published edges.
-The graph-view builder checks these additional digests:
+# Summarize a Table
 
-| Asset | Expected SHA256 |
-|---|---|
-| Runtime graph | `ff64ad00ef7b35e29586ac59ed8bec07f0a1452555a9ff19f89712fd85654770` |
-| Phase 1 checkpoint | `dd46baaab214491ebcf75b769d4608e067abc5aefbf8b97253edad7924816be0` |
+Inspect the headers, compare the requested rows or columns, and report the
+largest differences together with the units.
+```
 
-There is no public workspace download URL in this repository. A newly built
-workspace is suitable for method-level experimentation but will not pass the
-byte-level ablation gate unless it has the expected hashes.
+</details>
 
-### ALFWorld data
+### Step 2: Build the Candidate Graph
 
-Install the optional dependency, download the environment data, and set the
-root path:
-
-~~~bash
-uv sync --frozen --extra alfworld
-uv run alfworld-download --data-dir data/alfworld
-export ALFWORLD_DATA="$PWD/data/alfworld"
-~~~
-
-The supplied ALFWorld manifest records task identities and checksums only; it
-does not include the skill corpus or environment data.
-
-### ScienceWorld data
-
-ScienceWorld 1.2.3 installs its environment resources with the Python package.
-Set `JAVA_HOME` if `java` is not already on `PATH`, then validate the frozen
-episode selection:
-
-~~~bash
-uv run python -m evaluation.scienceworld_eto211_run --validate-only
-~~~
-
-A successful validation reports 211 episodes, 24 task types, the official
-`test` split, `easy` simplification, a 30-step limit, and 1,819 official test
-variations before selection.
-
-## Reproducibility Workflow
-
-### Phase 1: candidate graph construction
-
-Run the indexer from the repository root:
-
-~~~bash
+```bash
 uv run caskg-index data/skillsets/skills_1000 \
   --workspace data/caskg_workspace/skills_1000 \
   --clear
-~~~
+```
 
-The command discovers `SKILL.md` files recursively, builds skill nodes and
-embeddings, fuses the six candidate signals, writes `caskg_state.json`, and
-publishes the candidate retrieval graph. Every edge is still a hypothesis at
-this point.
+> `--clear` removes the target workspace before rebuilding it; omit the flag when that workspace must be preserved. Indexing sends skill text to the configured embedding and chat services.
 
-### Phase 2: counterfactual validation
+This indexes skill nodes, computes embeddings, induces directed candidate relations, and publishes an initial runtime graph.
 
-Validate selected candidate edges with all three probe types:
+### Step 3: Calibrate and Publish Edges
 
-~~~bash
+```bash
 uv run python experiments/run_validation.py \
   --workspace data/caskg_workspace/skills_1000 \
   --skills-dir data/skillsets/skills_1000 \
@@ -414,38 +272,78 @@ uv run python experiments/run_validation.py \
   --call-delay 1.05 \
   --batch-concurrency 16 \
   --seed 42
-~~~
+```
 
-The runner appends `validation_log.jsonl`, updates `caskg_state.json`, writes
-`validation_summary.json`, freezes edges outside the validation budget, and
-republishes the runtime graph. `--resume` skips probes already present in the
-log. `--dry-run` simulates outcomes and is useful for testing the control flow,
-but its results are not experimental evidence.
+This updates the calibrated edge states, appends the validation log, and republishes the weighted runtime graph. The command can issue many paid remote requests and uses concurrency 16, so adjust the budget and concurrency to the provider's limits. `--resume` skips successfully completed probes recorded in the matching log, but recovery is not strictly transactional or idempotent; keep the log and state from the same checkpoint and back up the workspace first. For a local pipeline check, copy the workspace, replace `--max-edges 500` with a small value, and add `--dry-run`. Dry-run outcomes are simulated, but the command still writes the validation log, state, summary, and published graph; never run it against a workspace that must remain unchanged.
 
-The reference Skill1000 graph has these checkpoints:
+### Step 4: Retrieve and Inspect
 
-| Stage | Count |
-|---|---:|
-| Phase 1 candidate edges | 9,937 |
-| Edges selected for Phase 2 | 500 |
-| Counterfactual probes | 1,500 |
-| Confirmed causal | 35 |
-| Rejected non-causal | 215 |
-| Deferred uncertain | 250 |
-| Deferred unvalidated | 9,437 |
-| Published runtime edges | 3,292 |
+```bash
+uv run caskg retrieve "plan a multi-step task" \
+  --workspace data/caskg_workspace/skills_1000 \
+  --max-skills 8 \
+  --json
 
-Remote model calls and scheduling can change a newly built graph. These counts
-are reference checkpoints, not a guarantee that a fresh run will be identical.
+uv run caskg status \
+  --workspace data/caskg_workspace/skills_1000
+```
 
-## Benchmark Evaluation
+The retrieval response includes the ranked skills and hydrated context that can be passed to an agent.
+
+## Agent Integration
+
+The command line is the canonical local interface. An MCP server is available for agents that support tool-based context retrieval, but it is optional and is not used by the benchmark runners.
+
+### Command Line
+
+| Workflow | Entry point |
+|---|---|
+| Build a candidate graph | `caskg-index <skill-directory>` |
+| Calibrate relation reliability | `python experiments/run_validation.py` |
+| Retrieve an agent-ready bundle | `caskg retrieve <task> --json` |
+| Inspect a workspace | `caskg status` |
+
+Run `uv run caskg --help`, `uv run caskg-index --help`, or `uv run python experiments/run_validation.py --help` for the complete option lists.
+
+### MCP Server (Optional)
+
+Set `CASKG_WORKING_DIR` to a prepared workspace, then start the stdio server:
+
+```bash
+uv run caskg-server
+```
+
+It exposes four tools:
+
+| Tool | Purpose |
+|---|---|
+| `search_skills` | Return a concise summary of relevant skills |
+| `retrieve_skill_bundle` | Return ranked skills and hydrated context |
+| `hydrate_skills` | Load full content for known skill names |
+| `get_graph_info` | Report graph size and retrieval defaults |
+
+This repository does not ship client auto-discovery configuration. Register `uv run caskg-server` manually in the MCP client and run it from the repository root.
+
+## Evaluation
+
+Both benchmarks run as local Python environments and call the CaSKG retrieval adapter directly. The commands below run the CaSKG condition for one configured model and workspace; they are not a turnkey reproduction of every row in the six-model result table.
 
 ### ALFWorld ID-140
 
-The basic runner evaluates the `eval_in_distribution` games when `--split dev`
-is used. The complete reference condition has 140 episodes:
+For the pinned paper environment, use Linux or WSL; the ALFWorld/TextWorld/Jericho dependency chain is not reliably installable on native Windows with Python 3.12 and may require a native compiler toolchain. Ensure `API_KEY` and `BASE_URL` are set in `.env` for the chat service; the runner falls back to `OPENAI_API_KEY` and `OPENAI_BASE_URL`. Then install the optional dependency, download the environment data, and expose its root:
 
-~~~bash
+```bash
+uv sync --frozen --extra alfworld
+uv run alfworld-download --data-dir data/alfworld
+export ALFWORLD_DATA="$PWD/data/alfworld"
+```
+
+PowerShell: `$env:ALFWORLD_DATA = (Resolve-Path data/alfworld).Path`.
+
+<details>
+<summary><strong>Run the intended 140-episode CaSKG condition</strong></summary>
+
+```bash
 uv run python evaluation/alfworld_run.py \
   --model MiniMax-M2.7 \
   --split dev \
@@ -456,32 +354,58 @@ uv run python evaluation/alfworld_run.py \
   --mode caskg \
   --caskg_workspace data/caskg_workspace/skills_1000 \
   --skills_dir data/skillsets/skills_1000
-~~~
+```
 
-The basic runner writes one record per episode under:
+When neither `--max_games` nor `--task_indices` is supplied, `--split dev` selects the 140 `eval_in_distribution` games. Episode records are written to:
 
-~~~text
+```text
 results/alfworld/MiniMax-M2.7/dev_skills_1000_mode_caskg/idx_<episode>.json
-~~~
+```
 
-The underscore-style flags (`--max_workers`, `--caskg_workspace`, and so on)
-match the existing runner interface. Use the parity runner in the ablation
-section when the frozen ID-140 task manifest and checksums must be enforced.
+The runner reuses any `idx_*.json` already present in that directory without checking its configuration or even confirming that the JSON is valid before skipping its index. Start each configuration with an empty output directory and a unique `--exp_name`. Afterward, verify that indices 0 through 139 are present, every JSON file parses, and each record contains the expected `name`, `reward`, and `steps` fields; a failed episode can otherwise leave the run incomplete without an aggregate summary.
 
-### ScienceWorld Unseen-211
+</details>
 
-Run a read-only retrieval preflight before a paid model run:
+### ScienceWorld U211 (Unseen-211)
 
-~~~bash
+Install the pinned Python packages and confirm that Java is available:
+
+```bash
+uv pip install "scienceworld==1.2.3" "py4j==0.10.9.9"
+java -version
+```
+
+Before evaluation, point the CaSKG entry in `configs/retrievers_v1.json` to the intended frozen workspace. Every model episode, including a partial development run, requires a controlled OpenAI-compatible router that returns `X-Router-Policy: strict`. A complete 211-episode run additionally requires `--expected-router-provider`, and every response must return the matching `X-Router-Provider`; partial runs enforce that header when the option is set. A generic endpoint without the strict-policy response header can run `--validate-only` or retrieval preflight, but it cannot run model episodes. The runner reads credentials from the process environment, so export them in the same shell; copying values into `.env` alone is insufficient.
+
+```bash
+export ROUTER_MASTER_KEY="<key>"
+export SCIENCEWORLD_ROUTER_BASE_URL="<controlled-router-url>"
+export CASKG_EXPECTED_CHAT_PROVIDER="<provider-id>"
+```
+
+PowerShell:
+
+```powershell
+$env:ROUTER_MASTER_KEY = "<key>"
+$env:SCIENCEWORLD_ROUTER_BASE_URL = "<controlled-router-url>"
+$env:CASKG_EXPECTED_CHAT_PROVIDER = "<provider-id>"
+```
+
+Validate the frozen 211-episode protocol without model calls, then run a one-episode retrieval preflight:
+
+```bash
+uv run python -m evaluation.scienceworld_eto211_run --validate-only
+
 uv run python -m evaluation.scienceworld_eto211_run \
   --retriever caskg \
   --max-episodes 1 \
   --retrieval-preflight
-~~~
+```
 
-Run the complete CaSKG condition with the formal four-worker protocol:
+<details>
+<summary><strong>Run the complete 211-episode CaSKG condition</strong></summary>
 
-~~~bash
+```bash
 uv run python -m evaluation.scienceworld_eto211_run \
   --retriever caskg \
   --model MiniMax-M2.7 \
@@ -491,268 +415,103 @@ uv run python -m evaluation.scienceworld_eto211_run \
   --run-cohort caskg-u211 \
   --max-workers 4 \
   --output-dir results/scienceworld
-~~~
+```
 
-The formal protocol requires one attempt for each of 211 episodes, four
-workers, a nonempty provider identity, and a nonempty cohort name. Existing
-records are resumed only when their protocol, prompt, manifest, retriever
-configuration, model, route, and evaluator fingerprint match the current run.
-The summary is written below:
+Compatible records are resumable. The aggregate summary is written to:
 
-~~~text
+```text
 results/scienceworld/eto_skillnet_unseen211/caskg/MiniMax-M2.7/summary.json
-~~~
+```
 
-## Ablation Experiments
+</details>
 
-The numbered protocol compares each intervention with a concurrent P0
-condition. The same provider, prompt, task manifest, evaluator, worker count,
-and time window are held fixed.
+## Development and Reference
 
-| Condition | Intervention |
+<details>
+<summary><strong>Testing</strong></summary>
+
+Core tests do not require a live model endpoint or graph workspace:
+
+```bash
+uv run pytest -m "not integration" tests
+uv run python -m compileall -q caskg experiments evaluation tests
+```
+
+After installing the ScienceWorld dependencies, run:
+
+```bash
+uv run pytest -m "not integration" evaluation/tests
+```
+
+Integration tests require configured model endpoints and, where applicable, a skill corpus and matching graph workspace.
+
+</details>
+
+<details>
+<summary><strong>Repository layout</strong></summary>
+
+```text
+.
+|-- assets/                 Method and scaling figures in PNG and PDF
+|-- caskg/
+|   |-- causal/             Candidate induction, probes, edge states, publication
+|   |-- core/               Skill parsing, graph storage, online retrieval
+|   |-- interfaces/         CLI and MCP entry points
+|   `-- utils/              Environment-based configuration
+|-- experiments/            Counterfactual edge-calibration runner
+|-- evaluation/             ALFWorld and ScienceWorld evaluation runners
+|-- configs/                Frozen evaluation and retriever configuration
+|-- manifests/              Frozen episode identities and checksums
+|-- prompts/                Frozen evaluation prompts
+|-- tests/                  Core unit and integration tests
+|-- .env.example            Credential-free configuration template
+|-- pyproject.toml          Package metadata and dependencies
+`-- uv.lock                 Locked dependency graph
+```
+
+</details>
+
+<details>
+<summary><strong>Reproducibility notes</strong></summary>
+
+- This repository contains the CaSKG implementation and CaSKG evaluation runners. Skill1000, the frozen paper workspace, raw model outputs, and comparison-system implementations are not bundled.
+- Remote graph-construction and agent calls can be stochastic. Preserve the model route, embedding configuration, workspace, protocol files, and hashes with each run.
+- The supplied ScienceWorld protocol does not enumerate the complete six-model manuscript table, although the runner accepts an explicit model name.
+- The result tables and scaling figure above transcribe archived manuscript artifacts; this README does not add uncertainty estimates or statistical-significance claims.
+
+</details>
+
+<details>
+<summary><strong>Troubleshooting</strong></summary>
+
+| Problem | Resolution |
 |---|---|
-| `p0-api2-full-control` | Full CaSKG retrieval on the frozen graph |
-| `a1-vector-only-no-ppr` | Vector top-N only; PPR and lexical expansion disabled |
-| `a2-matched-rewired-s7302` | Within-type, degree-preserving endpoint rewiring (seed 7302) |
-| `a3-fixed-topology-phase1-weights` | Frozen topology with Phase 1 association weights |
-| `a4-phase2-evidence-shuffle-s7301` | Matched Phase 2 evidence-package shuffle (seed 7301) |
+| `No usable Java runtime was found` | Install a JDK, set `JAVA_HOME`, and confirm `java -version` in the same shell. |
+| `Embedding dimension mismatch` | Use the embedding model and dimension that built the workspace. |
+| `Workspace does not exist` | Resolve paths from the repository root and pair the workspace with its original skill directory. |
+| `Router provider mismatch` or `Router policy mismatch` | Use the controlled router and ensure every response returns the expected `X-Router-Provider` and `X-Router-Policy: strict` headers. |
+| `ALFWORLD_DATA` paths are unresolved | Confirm that the root contains `json_2.1.1/valid_seen` and `logic/alfred.pddl`. |
 
-The protocol and acceptance rules are frozen in
-[`ablation_experiments/protocols/caskg-s1000-a1-a4-main-parity-v1.yaml`](ablation_experiments/protocols/caskg-s1000-a1-a4-main-parity-v1.yaml).
-Generated graph views are not included; build them from the external frozen
-workspace:
+</details>
 
-~~~bash
-uv run python ablation_experiments/scripts/build_numbered_graph_views.py \
-  --source-workspace data/caskg_workspace/skills_1000_v32_scaffold_publish_gospath \
-  --output-root ablation_experiments/graph_views/generated/a1-a4-main-parity-v1
-~~~
+<details>
+<summary><strong>Authors, affiliations, and paper metadata</strong></summary>
 
-The builder treats the source workspace as read-only and writes isolated views
-plus `asset_manifest.json`. It refuses to overwrite an existing output unless
-`--force` is supplied. P0 intentionally uses the byte-identical A1 workspace;
-the runtime configuration, rather than the graph bytes, disables the A1
-retrieval operation.
+| Author | Affiliation(s) | Location | Email | Note |
+|---|---|---|---|---|
+| Zhiyuan Li | School of Artificial Intelligence, Jilin University; Ant Group | Changchun, China | [zhiyuanl24@mails.jlu.edu.cn](mailto:zhiyuanl24@mails.jlu.edu.cn) | Equal contribution; work done while an intern at Ant Group |
+| Linyuan Gao | School of Artificial Intelligence, Jilin University | Changchun, China | [lygao25@mails.jlu.edu.cn](mailto:lygao25@mails.jlu.edu.cn) | Equal contribution |
+| Xuechun Ding | Ant Group | Hangzhou, China | [dingxuechun.dxc@antgroup.com](mailto:dingxuechun.dxc@antgroup.com) |  |
+| Hongwei Chen | Ant Group | Hangzhou, China | [wei.chenhw@antgroup.com](mailto:wei.chenhw@antgroup.com) | Co-corresponding author |
+| Yuan Wu | School of Artificial Intelligence, Jilin University | Changchun, China | [yuanwu@jlu.edu.cn](mailto:yuanwu@jlu.edu.cn) | Co-corresponding author |
+| Yi Chang | School of Artificial Intelligence, Jilin University | Changchun, China | [yichang@jlu.edu.cn](mailto:yichang@jlu.edu.cn) |  |
 
-### ALFWorld ablation condition
+**Title:** CaSKG: Counterfactual-Causal Skill Graphs for Scalable Agent Skill Retrieval
 
-Set `VARIANT`, `WORKSPACE`, and `RUN_ROOT` for a row in the table above. This
-example runs P0:
+**Short author list:** Z. Li, et al.
 
-~~~bash
-export VARIANT=p0-api2-full-control
-export WORKSPACE="$PWD/ablation_experiments/graph_views/generated/a1-a4-main-parity-v1/a1-vector-only-no-ppr/workspace"
-export RUN_ROOT="$PWD/ablation_experiments/results/a1-a4-main-parity-v1/formal/reproduction"
+**CCS concepts:** Computing methodologies: Planning and scheduling; Information systems: Retrieval models and ranking; Computing methodologies: Natural language processing.
 
-export CASKG_ABLATION_EMBEDDING_CACHE="$PWD/ablation_experiments/cache/a1-a4-main-parity-v1/query_embeddings.sqlite3"
-export CASKG_ABLATION_RETRIEVAL_AUDIT_DIR="$PWD/ablation_experiments/audits/runtime/a1-a4-main-parity-v1/$VARIANT/alfworld"
-export CASKG_ABLATION_TRACE_DIR="$PWD/ablation_experiments/traces/a1-a4-main-parity-v1/$VARIANT/alfworld"
+**Keywords:** LLM agents, skill retrieval, graph retrieval, causal validation, counterfactual reasoning.
 
-uv run python -m ablation_experiments.runners.run_alfworld_numbered_staged \
-  --variant "$VARIANT" \
-  --workspace "$WORKSPACE" \
-  --skills-dir data/skillsets/skills_1000 \
-  --output-dir "$RUN_ROOT/alfworld-id140/$VARIANT" \
-  --model MiniMax-M2.7 \
-  --split dev \
-  --max-workers 4 \
-  --max-steps 30 \
-  --historical-task-manifest ablation_experiments/manifests/generated/alfworld-s1000-main-a0-task-manifest-v1.json
-~~~
-
-This runner also requires `ROUTER_MASTER_KEY`, `CASKG_ROUTER_BASE`,
-`CASKG_EXPECTED_CHAT_PROVIDER`, and `CASKG_ROUTER_SESSION_ID`. Repeat the
-command for A1 through A4 using their mapped workspaces. The preregistered
-groups are P0/A1, A2/A3, and A4; keep the total active workers within the
-available provider budget.
-
-### ScienceWorld ablation condition
-
-Change `VARIANT` and `CONFIG` for each row in the runtime mapping:
-
-| Condition | Workspace suffix | Runtime configuration |
-|---|---|---|
-| P0 | `a1-vector-only-no-ppr/workspace` | `scienceworld-p0-api2-full-control.json` |
-| A1 | `a1-vector-only-no-ppr/workspace` | `scienceworld-a1-vector-only-no-ppr.json` |
-| A2 | `a2-matched-rewired-s7302/workspace` | `scienceworld-a2-matched-rewired-s7302.json` |
-| A3 | `a3-fixed-topology-phase1-weights/workspace` | `scienceworld-a3-fixed-topology-phase1-weights.json` |
-| A4 | `a4-phase2-evidence-shuffle-s7301/workspace` | `scienceworld-a4-phase2-evidence-shuffle-s7301.json` |
-
-~~~bash
-export VARIANT=p0-api2-full-control
-export CONFIG=scienceworld-p0-api2-full-control.json
-export RUN_ROOT="$PWD/ablation_experiments/results/a1-a4-main-parity-v1/formal/reproduction"
-
-uv run python -m ablation_experiments.runners.run_scienceworld_numbered \
-  --retriever-config "ablation_experiments/configs/runtime/numbered/$CONFIG" \
-  --retriever caskg \
-  --model MiniMax-M2.7 \
-  --api-base "$SCIENCEWORLD_ROUTER_BASE_URL" \
-  --api-key-env ROUTER_MASTER_KEY \
-  --expected-router-provider "$CASKG_EXPECTED_CHAT_PROVIDER" \
-  --run-cohort minimax-m27-a1-a4-main-parity-v1 \
-  --max-workers 4 \
-  --output-dir "$RUN_ROOT/scienceworld-unseen211/$VARIANT"
-~~~
-
-### Analyze paired results
-
-The analysis is fail-closed and requires all 140 ALFWorld and all 211
-ScienceWorld records for P0 and A1-A4, plus historical A0 records supplied
-outside this repository:
-
-~~~text
-results/historical/alfworld/MiniMax-M2.7/idx_*.json
-results/historical/scienceworld/MiniMax-M2.7/**/episode_*.json
-~~~
-
-~~~bash
-uv run python ablation_experiments/scripts/analyze_numbered_results.py \
-  --run-root "$RUN_ROOT" \
-  --historical-a0-alfworld results/historical/alfworld/MiniMax-M2.7 \
-  --historical-a0-scienceworld results/historical/scienceworld/MiniMax-M2.7
-~~~
-
-The script writes `numbered_ablation_analysis.json` and
-`NUMBERED_ABLATION_RESULTS.md` under `$RUN_ROOT/analysis/`. It uses 10,000
-paired bootstrap samples, exact McNemar tests for binary outcomes, a paired
-sign-flip test for ScienceWorld scores, and Holm correction across the four
-P0-minus-ablation contrasts per benchmark.
-
-## Reference Run Checkpoints
-
-The following values are recorded reference-run checkpoints. Raw episode
-outputs are external and are not generated during installation.
-
-| Condition | ALFWorld success | ScienceWorld mean score | ScienceWorld full success |
-|---|---:|---:|---:|
-| Historical A0 | 103/140 (73.57%) | 68.33 | 43.13% |
-| Concurrent P0 | 96/140 (68.57%) | 72.09 | 49.29% |
-| A1 | 105/140 (75.00%) | 68.46 | 47.39% |
-| A2 | 95/140 (67.86%) | 68.49 | 45.97% |
-| A3 | 102/140 (72.86%) | 72.59 | 51.66% |
-| A4 | 93/140 (66.43%) | 70.57 | 46.92% |
-
-Historical A0 and concurrent P0 used different ScienceWorld provider and
-evaluator conditions. Only paired P0 versus A1-A4 comparisons are used for
-ablation inference. A remote-model rerun is stochastic and may differ at the
-episode level; protocol, graph, task, prompt, and completion checks are the
-relevant parity signals.
-
-## Tests
-
-Run the model-free unit and protocol tests:
-
-~~~bash
-uv run pytest -m "not integration" tests evaluation/tests \
-  ablation_experiments/tests/test_causal_graph_views.py
-~~~
-
-In the checked Python 3.12.13 environment this command completed with
-`125 passed, 5 deselected`. The evaluator-only suite can also be run directly:
-
-~~~bash
-uv run pytest evaluation/tests
-~~~
-
-The checked evaluator-only run completed with 13 passed. Test counts can
-change when dependencies or protocol files change.
-
-The numbered graph-view tests require the external frozen workspace and the
-generated views:
-
-~~~bash
-uv run pytest \
-  ablation_experiments/tests/test_numbered_graph_views.py \
-  ablation_experiments/tests/test_numbered_runtime.py
-~~~
-
-The ALFWorld parity test imports a runner that checks for a router credential at
-import time. A non-secret placeholder is enough for this unit test:
-
-~~~bash
-ROUTER_MASTER_KEY=test-only uv run pytest \
-  ablation_experiments/tests/test_alfworld_main_parity.py
-~~~
-
-Check syntax without starting an experiment:
-
-~~~bash
-uv run python -m compileall -q \
-  caskg experiments evaluation ablation_experiments tests
-~~~
-
-The complete `tests/` suite includes integration tests that need a real model
-endpoint and workspace. Without those external services, a small number of
-integration failures is expected; it does not indicate that the model-free
-tests failed. In the checked environment, the full suite finished with
-123 passed and 3 integration failures.
-
-## Output Checks
-
-A complete ALFWorld condition contains 140 valid episode records and a summary
-with:
-
-~~~text
-metrics.valid_score_count = 140
-metrics.missing_or_infrastructure_count = 0
-metrics.formal_complete = true
-~~~
-
-A complete ScienceWorld condition contains 211 valid records and a summary
-with:
-
-~~~text
-metrics.valid_score_count = 211
-metrics.infrastructure_error_count = 0
-metrics.formal_complete = true
-~~~
-
-These summary fields apply to the protocol/parity runners. The basic
-`evaluation/alfworld_run.py` entry point writes per-episode `idx_*.json` files
-and does not by itself create a formal summary.
-
-Keep completed episodes even when their outcomes differ from a reference run.
-Infrastructure failures are reported separately from model failures.
-
-## Known Limitations
-
-- The Skill1000 skill text, API credentials, raw model responses, benchmark
-  installations, and frozen workspaces are not included.
-- No public URL for the exact frozen CaSKG workspace is configured here.
-  Method-level runs can build a new graph, but exact byte-level ablations need
-  the matching external workspace.
-- `ablation_experiments/graph_views/generated/` is generated output, so the
-  numbered ablation is not a one-command checkout-and-run experiment.
-- `configs/retrievers_v1.json` currently describes the CaSKG worker. A complete
-  paired comparison-method implementation is outside this repository.
-- `--seed 42` controls local random choices but cannot make remote LLM calls or
-  concurrent provider scheduling fully deterministic.
-- Formal ScienceWorld evaluation requires the strict router headers described
-  above. A plain OpenAI-compatible endpoint is suitable only for development
-  and retrieval preflight.
-- Native Windows may expose path-separator differences in one parser assertion;
-  WSL2 or Linux matches the tested benchmark environment.
-
-This means the repository supports method inspection, local smoke tests, and
-controlled reproduction when the external assets and services are supplied. It
-does not claim that every reported benchmark table can be regenerated from the
-checkout alone.
-
-## Troubleshooting
-
-| Symptom | Action |
-|---|---|
-| `No usable Java runtime was found` | Install a JDK, set `JAVA_HOME` to its root, and confirm `java -version` in the same shell. |
-| `Embedding dimension mismatch` | Restore the embedding model and dimension used to build the workspace. The reference workspace uses dimension 4096. |
-| `Workspace does not exist` or `Invalid CaSKG workspace` | Check both the skill directory and its matching workspace path relative to the repository root. |
-| `Runtime graph checksum mismatch` | Use the frozen external workspace and verify the two SHA256 values in External Assets. |
-| `Router provider` or `policy` mismatch | Use the controlled strict router and set `CASKG_EXPECTED_CHAT_PROVIDER` to the returned provider identity. |
-| `retrieval worker exited` or timed out | Confirm the runtime JSON points to this project root, the selected workspace exists, and the embedding endpoint is reachable. |
-| Incomplete ALFWorld or ScienceWorld records | Supply every required episode; the analysis intentionally fails closed on missing records. |
-| `ALFWORLD_DATA` paths unresolved | Confirm the root contains `json_2.1.1/valid_seen` and `logic/alfred.pddl`. |
-| One parsing test fails only on native Windows | Run the suite under WSL/Linux; the assertion compares a portable `scripts/run.py` spelling with Windows backslashes. |
-
-For additional command options, inspect the `--help` output of the relevant
-runner and the protocol files under `configs/` and
-`ablation_experiments/protocols/`.
+</details>
